@@ -3,7 +3,6 @@ package dev.denaro.dialog;
 import dev.denaro.FriendlyGuidePlugin;
 import dev.denaro.dialog.options.*;
 import dev.denaro.dialog.options.requirements.*;
-import net.runelite.api.Varbits;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
@@ -43,7 +42,7 @@ public abstract class Dialog
             .setNext(new DialogOption(
                     new DialogOption.Option[]{
                             new DialogOption.Option("Combat", () -> Dialog.buildOption(plugin, getCombatResponses())),
-                            new DialogOption.Option("Quest", () -> Dialog.buildOption(plugin, getQuestResponses())),
+                            new DialogOption.Option("Quest", () -> Dialog.buildOption(plugin, getQuestResponses(), dr -> dr.isQuestUnstarted(plugin.getClient()))),
                             new DialogOption.Option("Money", () -> Dialog.buildOption(plugin, getMoneyResponses())),
                             new DialogOption.Option("Skill", () -> new DialogOption(new DialogOption.Option[]{
                                     new DialogOption.Option("Gather", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Gather"))),
@@ -64,14 +63,14 @@ public abstract class Dialog
         return dialog;
     }
 
-    private static Stream<DialogResponse> getCombatResponses()
+    private static Stream<DialogCombatResponse> getCombatResponses()
     {
-        return getResponses(DialogType.Combat, DialogResponse.class);
+        return getResponses(DialogType.Combat, DialogCombatResponse.class);
     }
 
-    private static Stream<DialogResponse> getQuestResponses()
+    private static Stream<DialogQuestResponse> getQuestResponses()
     {
-        return getResponses(DialogType.Quest, DialogResponse.class);
+        return getResponses(DialogType.Quest, DialogQuestResponse.class);
     }
 
     private static Stream<DialogResponse> getMoneyResponses()
@@ -79,9 +78,9 @@ public abstract class Dialog
         return getResponses(DialogType.Money, DialogResponse.class);
     }
 
-    private static Stream<DialogResponse> getExploreResponses()
+    private static Stream<DialogExploreResponse> getExploreResponses()
     {
-        return getResponses(DialogType.Explore, DialogResponse.class);
+        return getResponses(DialogType.Explore, DialogExploreResponse.class);
     }
 
     private static Stream<DialogItemResponse> getItemResponses()
@@ -106,9 +105,11 @@ public abstract class Dialog
 
     private static <T extends DialogResponse> Dialog buildOption(FriendlyGuidePlugin plugin, Stream<T> dialogs, Predicate<T> predicate)
     {
-        List<T> list = dialogs.filter(predicate).filter(response ->
+        List<T> list = dialogs.peek(System.out::println).filter(predicate).filter(response ->
                 response.requirements.stream().allMatch(requirement -> !requirement.isRequirementRequired(plugin.getClient()) || requirement.isMet(plugin.getClient()))
         ).collect(Collectors.toList());
+
+        System.out.println("Filtered dialogs:" + list);
 
         if (list.isEmpty())
         {

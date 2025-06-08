@@ -1,21 +1,54 @@
 package dev.denaro.dialog.options.requirements;
 
+import dev.denaro.dialog.Dialog;
 import net.runelite.api.Client;
 import net.runelite.api.Varbits;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
 
 public abstract class DialogRequirement
 {
     static
     {
-        // TODO: Load the requirement classes at runtime so they register their create calls.
+        CreateCalls = new HashMap<>();
+        System.out.println("Loading dialog requirements");
+
+        InputStream requirementsFolder = Dialog.class.getResourceAsStream("/dev/denaro/dialog/options/requirements");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(requirementsFolder));
+        ArrayList<String> files = new ArrayList<>();
+        String resource;
+        try
+        {
+            while((resource = reader.readLine()) != null) {
+                files.add("/dev/denaro/dialog/options/requirements/" + resource);
+            }
+
+            reader.close();
+
+            System.out.println(files);
+
+            for (String file : files)
+            {
+                String className = file.replaceAll("/", ".").replaceAll(".class", "").substring(1);
+
+                System.out.println("Attempting to load file: " + file + " as: " + className);
+                Class.forName(className);
+            }
+
+        }
+        catch(Exception ex)
+        {
+            ex.printStackTrace();
+        }
     }
 
-    private static Map<String, Function<Map<String, Object>, DialogRequirement>> CreateCalls = new HashMap<>();
+    private static Map<String, Function<Map<String, Object>, DialogRequirement>> CreateCalls;
     public static void RegisterCreateCall(String key, Function<Map<String, Object>, DialogRequirement> func)
     {
         CreateCalls.put(key, func);
@@ -32,6 +65,10 @@ public abstract class DialogRequirement
     protected void setup(Map<String, Object> requirementMap)
     {
         this.condition = (String)requirementMap.get("if");
+        if (this.condition != null)
+        {
+            System.out.println(this + " has the condition: " + this.condition);
+        }
     }
 
     public abstract boolean isMet(Client client);
@@ -41,9 +78,9 @@ public abstract class DialogRequirement
         if ("ironman".equals(this.condition) && client.getVarbitValue(Varbits.ACCOUNT_TYPE) == 0)
         {
             // Skip ("pass") since account type 0 is not ironman
-            return true;
+            return false;
         }
 
-        return false;
+        return true;
     }
 }

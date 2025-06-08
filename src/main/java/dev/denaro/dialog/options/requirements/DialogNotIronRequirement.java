@@ -4,9 +4,11 @@ import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
 import net.runelite.api.Varbits;
+import net.runelite.api.annotations.Component;
 
 import java.util.Map;
 
+@Component
 public class DialogNotIronRequirement extends DialogRequirement
 {
     static

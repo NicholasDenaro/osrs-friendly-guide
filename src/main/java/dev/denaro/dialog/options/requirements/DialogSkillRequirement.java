@@ -3,10 +3,11 @@ package dev.denaro.dialog.options.requirements;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
-import net.runelite.api.Varbits;
+import net.runelite.api.annotations.Component;
 
 import java.util.Map;
 
+@Component
 public class DialogSkillRequirement extends DialogRequirement
 {
     String skill;
@@ -48,6 +49,14 @@ public class DialogSkillRequirement extends DialogRequirement
 
         int skillLevel = client.getRealSkillLevel(Skill.valueOf(this.skill.toUpperCase()));
 
-        return skillLevel >= this.levelMin && skillLevel <= this.levelMax;
+        System.out.println("Checking " + this.levelMin + " <= " + this.skill + " " + skillLevel + " <= " + this.levelMax);
+
+        return this.levelMin <= skillLevel && skillLevel <= this.levelMax;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "DialogSkillRequirement: " + this.skill + " lvl " + this.levelMin + " max " + this.levelMax;
     }
 }

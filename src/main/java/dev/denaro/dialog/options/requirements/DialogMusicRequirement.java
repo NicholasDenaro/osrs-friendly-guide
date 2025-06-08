@@ -1,11 +1,13 @@
 package dev.denaro.dialog.options.requirements;
 
 import net.runelite.api.Client;
+import net.runelite.api.annotations.Component;
 import net.runelite.api.gameval.DBTableID;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 
+@Component
 public class DialogMusicRequirement extends DialogRequirement
 {
     String quest;

@@ -1,9 +1,11 @@
 package dev.denaro.dialog.options.requirements;
 
 import net.runelite.api.*;
+import net.runelite.api.annotations.Component;
 
 import java.util.Map;
 
+@Component
 public class DialogQuestRequirement extends DialogRequirement
 {
     String quest;

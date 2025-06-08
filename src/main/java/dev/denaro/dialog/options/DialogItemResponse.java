@@ -16,4 +16,10 @@ public class DialogItemResponse extends DialogResponse
     {
         return type.equalsIgnoreCase(this.itemType);
     }
+
+    @Override
+    public String toString()
+    {
+        return "DialogItemResponse " + itemType + " " + this.requirements + " " + this.messages;
+    }
 }

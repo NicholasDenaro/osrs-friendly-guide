@@ -1,5 +1,5 @@
 type: Quest
-name: The Lost Tribe
+quest: The Lost Tribe
 requirements:
   - type: Quest
     name: Goblin Diplomacy
