@@ -8,28 +8,25 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.Point;
-import net.runelite.api.events.CommandExecuted;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.MenuOpened;
-import net.runelite.api.events.MenuOptionClicked;
+import net.runelite.api.events.*;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
-import net.runelite.client.input.MouseManager;
 import net.runelite.client.menus.MenuManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.overlay.tooltip.Tooltip;
+import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 
 import java.awt.*;
-import java.util.Arrays;
 
 @Slf4j
 @PluginDescriptor(
 	name = "Friendly Guide"
 )
-public class FriendlyGuidePlugin extends Plugin // implements MouseListener
+public class FriendlyGuidePlugin extends Plugin
 {
 	@Getter
 	@Inject
@@ -51,19 +48,22 @@ public class FriendlyGuidePlugin extends Plugin // implements MouseListener
 	private MenuManager menuManager;
 
 	@Inject
-	private MouseManager mouseManager;
+	private TooltipManager tooltipManager;
 
 	@Inject
 	private ClientThread clientThread;
 
 	private DialogBox dialog;
 	private Guide guide;
+	private Tooltip tooltip;
+	private boolean infoBoxAdded = false;
 
 	@Override
 	protected void startUp() throws Exception
 	{
 		log.info("Friendly Guide started!");
-//		mouseManager.registerMouseListener(this);
+
+		this.tooltip = new Tooltip("Talk to Friendly Guide");
 	}
 
 	@Override
@@ -118,7 +118,7 @@ public class FriendlyGuidePlugin extends Plugin // implements MouseListener
 				clientThread.invokeLater(() -> {
 					MenuEntry entry = this.client.getMenu().createMenuEntry(-1);
 					entry.setOption("Talk to Friendly Guide");
-					entry.setType(MenuAction.EXAMINE_NPC);
+					entry.setType(MenuAction.CANCEL);
 				});
 			}
 		}
@@ -127,6 +127,14 @@ public class FriendlyGuidePlugin extends Plugin // implements MouseListener
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked menuOptionClicked)
 	{
+		if (menuOptionClicked.getMenuOption().equalsIgnoreCase("Talk to Friendly Guide"))
+		{
+			this.dialog = new DialogBox(this, Dialog.createDialogTree(this));
+			this.chatboxPanelManager.openInput(this.dialog);
+
+			return;
+		}
+
 		if (this.guide != null)
 		{
 			Shape shape = Perspective.getClickbox(this.client, this.guide.getModel(), this.guide.getOrientation(), this.guide.getX(), this.guide.getY(), this.guide.getZ());
@@ -139,6 +147,25 @@ public class FriendlyGuidePlugin extends Plugin // implements MouseListener
 				this.chatboxPanelManager.openInput(this.dialog);
 
 				menuOptionClicked.consume();
+			}
+		}
+	}
+
+	@Subscribe
+	public void onBeforeRender(BeforeRender beforeRender)
+	{
+		if (client.isMenuOpen())
+		{
+			return;
+		}
+
+		if (this.guide != null)
+		{
+			Shape shape = Perspective.getClickbox(this.client, this.guide.getModel(), this.guide.getOrientation(), this.guide.getX(), this.guide.getY(), this.guide.getZ());
+			Point point = this.client.getMouseCanvasPosition();
+			if (shape != null && shape.contains(point.getX(), point.getY()))
+			{
+				tooltipManager.add(this.tooltip);
 			}
 		}
 	}
