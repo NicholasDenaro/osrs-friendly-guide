@@ -1,0 +1,14 @@
+type: Combat
+skills:
+  - Attack
+  - Defense
+  - Strength
+requirements:
+  - type: Skill
+    name: Combat
+    level: 3
+    levelMax: 128
+messages:
+  - Goblins are a good place to start.
+  - You can find a group of them in an abandoned house, just east of the Lumbridge bridge.
+  - Don't forget to bring some food and your combat gear.

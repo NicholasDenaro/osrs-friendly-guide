@@ -1,0 +1,15 @@
+type: Combat
+skills:
+  - Strength
+requirements:
+  - type: Skill
+    name: Strength
+    level: 80
+    levelMax: 99
+  - type: Skill
+    name: Attack
+    level: 80
+    levelMax: 99
+messages:
+  - Go fight some Lesser Demons
+  - You can find a group of them in a dungeon or something
