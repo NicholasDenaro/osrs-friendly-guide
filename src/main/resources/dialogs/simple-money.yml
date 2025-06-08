@@ -1,0 +1,10 @@
+type: Money
+ironman: false
+requirements:
+  - type: Skill
+    name: Crafting
+    level: 5
+    levelMax: 99
+messages:
+  - You can probably craft gold rings for a profit.
+  - Just buy gold bars from the Grand Exchange and then craft them using the Edgeville furnace.

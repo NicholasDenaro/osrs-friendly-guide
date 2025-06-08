@@ -6,9 +6,19 @@ import dev.denaro.dialog.DialogMessage;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class DialogResponse
+public class DialogResponse
 {
+    public String subType;
+    public List<DialogSkillRequirement> requirements;
     public List<String> messages;
+    public boolean ironman;
+
+    public DialogResponse(List<String> messages, List<DialogSkillRequirement> requirements, String subType, boolean ironman) {
+        this.messages = messages;
+        this.requirements = requirements;
+        this.subType = subType;
+        this.ironman = ironman;
+    }
 
     public Dialog createDialog()
     {

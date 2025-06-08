@@ -7,7 +7,7 @@ requirements:
   - type: Skill
     name: Combat
     level: 3
-    levelMax: 128
+    levelMax: 10
 messages:
   - Goblins are a good place to start.
   - You can find a group of them in an abandoned house, just east of the Lumbridge bridge.

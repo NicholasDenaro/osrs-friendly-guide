@@ -6,4 +6,6 @@ public enum DialogType
     Quest,
     Item,
     Explore,
+    Money,
+    Skill,
 }

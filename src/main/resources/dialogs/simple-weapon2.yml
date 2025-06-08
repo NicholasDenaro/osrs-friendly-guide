@@ -1,0 +1,14 @@
+type: Item
+subType: Weapon
+requirements:
+  - type: Skill
+    name: Attack
+    level: 70
+    levelMax: 99
+  - type: Skill
+    if: ironman
+    name: Slayer
+    level: 85
+    levelMax: 99
+messages:
+  - Whips are a great weapon.

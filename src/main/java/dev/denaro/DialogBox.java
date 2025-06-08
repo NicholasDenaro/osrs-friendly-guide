@@ -152,8 +152,6 @@ public class DialogBox extends ChatboxInput
         }
     }
 
-
-
     private void constructPlayerFace(Widget chatbox)
     {
         Widget face = chatbox.createChild(-1, WidgetType.MODEL);
