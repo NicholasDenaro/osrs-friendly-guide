@@ -1,0 +1,24 @@
+package dev.denaro.dialog.options;
+
+import dev.denaro.dialog.options.requirements.DialogRequirement;
+import net.runelite.api.Client;
+import net.runelite.api.Quest;
+import net.runelite.api.QuestState;
+
+import java.util.List;
+
+public class DialogQuestResponse extends DialogResponse
+{
+    public String quest;
+    public DialogQuestResponse(List<String> messages, List<DialogRequirement> requirements, String quest) {
+        super(messages, requirements);
+        this.quest = quest;
+    }
+
+    public boolean isQuestUnstarted(Client client)
+    {
+        QuestState state = Quest.valueOf(this.quest.toUpperCase().replaceAll(" ", "_")).getState(client);
+
+        return state == QuestState.NOT_STARTED;
+    }
+}

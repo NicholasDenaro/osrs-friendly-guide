@@ -1,6 +1,4 @@
 type: Combat
-skills:
-  - Slayer
 requirements:
   - type: Skill
     name: Combat

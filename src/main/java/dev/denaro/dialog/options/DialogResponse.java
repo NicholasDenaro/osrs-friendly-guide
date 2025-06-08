@@ -2,22 +2,19 @@ package dev.denaro.dialog.options;
 
 import dev.denaro.dialog.Dialog;
 import dev.denaro.dialog.DialogMessage;
+import dev.denaro.dialog.options.requirements.DialogRequirement;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DialogResponse
 {
-    public String subType;
-    public List<DialogSkillRequirement> requirements;
+    public List<DialogRequirement> requirements;
     public List<String> messages;
-    public boolean ironman;
 
-    public DialogResponse(List<String> messages, List<DialogSkillRequirement> requirements, String subType, boolean ironman) {
+    public DialogResponse(List<String> messages, List<DialogRequirement> requirements) {
         this.messages = messages;
         this.requirements = requirements;
-        this.subType = subType;
-        this.ironman = ironman;
     }
 
     public Dialog createDialog()

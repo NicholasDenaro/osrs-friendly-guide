@@ -1,5 +1,5 @@
 type: Item
-subType: Weapon
+itemType: Weapon
 requirements:
   - type: Skill
     name: Attack

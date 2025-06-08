@@ -1,6 +1,6 @@
 type: Money
-ironman: false
 requirements:
+  - type: NotIron
   - type: Skill
     name: Crafting
     level: 20

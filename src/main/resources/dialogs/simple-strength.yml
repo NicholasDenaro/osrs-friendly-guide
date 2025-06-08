@@ -1,6 +1,4 @@
 type: Combat
-skills:
-  - Strength
 requirements:
   - type: Skill
     name: Strength

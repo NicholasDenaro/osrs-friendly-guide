@@ -1,0 +1,21 @@
+type: Quest
+name: The Lost Tribe
+requirements:
+  - type: Quest
+    name: Goblin Diplomacy
+    status: complete
+  - type: Quest
+    name: Rune Mysteries
+    status: complete
+  - type: Skill
+    name: Agility
+    level: 13
+  - type: Skill
+    name: Thieving
+    level: 13
+  - type: Skill
+    name: Mining
+    level: 17
+messages:
+  - I heard rumors there was something going on below Lumbridge Castle.
+  - The duke is sure to know more about this. Why not speak with him?

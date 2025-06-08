@@ -1,5 +1,4 @@
 type: Money
-ironman: false
 requirements:
   - type: Skill
     name: Crafting
