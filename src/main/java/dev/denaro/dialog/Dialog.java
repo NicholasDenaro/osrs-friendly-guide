@@ -47,7 +47,7 @@ public abstract class Dialog
                             new DialogOption.Option("Skill", () -> new DialogOption(new DialogOption.Option[]{
                                     new DialogOption.Option("Gather", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Gather"))),
                                     new DialogOption.Option("Refine", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Refine"))),
-                                    new DialogOption.Option("Magic", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Magic"))),
+                                    new DialogOption.Option("Combat", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Combat"))),
                                     new DialogOption.Option("Other", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Other"))),
                             })),
                             new DialogOption.Option("Item", () -> new DialogOption(new DialogOption.Option[]{
@@ -55,6 +55,7 @@ public abstract class Dialog
                                     new DialogOption.Option("Armor", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Armor"))),
                                     new DialogOption.Option("Potion", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Potion"))),
                                     new DialogOption.Option("Teleport", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Teleport"))),
+                                    new DialogOption.Option("Food", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Food"))),
                             })),
                             new DialogOption.Option("Explore", () -> Dialog.buildOption(plugin, getExploreResponses())),
                     })
@@ -73,9 +74,9 @@ public abstract class Dialog
         return getResponses(DialogType.Quest, DialogQuestResponse.class);
     }
 
-    private static Stream<DialogResponse> getMoneyResponses()
+    private static Stream<DialogMoneyResponse> getMoneyResponses()
     {
-        return getResponses(DialogType.Money, DialogResponse.class);
+        return getResponses(DialogType.Money, DialogMoneyResponse.class);
     }
 
     private static Stream<DialogExploreResponse> getExploreResponses()
@@ -118,7 +119,7 @@ public abstract class Dialog
         }
 
         int index = (int) (Math.random() * list.size());
-        return list.get(index).createDialog();
+        return list.get(index).createDialog(plugin.getClient());
     }
 
     static {
@@ -155,7 +156,7 @@ public abstract class Dialog
                     String type = (String)document.get("type");
 
                     List<Map<String, Object>> requirements = (List<Map<String, Object>>)document.get("requirements");
-                    List<String> messages = (List<String>)document.get("messages");
+                    List<Object> messages = (List<Object>)document.get("messages");
 
                     List<DialogRequirement> requirementList = new ArrayList<>();
                     for (Map<String, Object> requirementMap : requirements)

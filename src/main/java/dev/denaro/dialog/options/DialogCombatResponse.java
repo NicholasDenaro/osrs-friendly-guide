@@ -6,7 +6,7 @@ import java.util.List;
 
 public class DialogCombatResponse extends DialogResponse
 {
-    public DialogCombatResponse(List<String> messages, List<DialogRequirement> requirements) {
+    public DialogCombatResponse(List<Object> messages, List<DialogRequirement> requirements) {
         super(messages, requirements);
     }
 }

@@ -7,7 +7,7 @@ import java.util.List;
 public class DialogSkillResponse extends DialogResponse
 {
     public String skillGroup;
-    public DialogSkillResponse(List<String> messages, List<DialogRequirement> requirements, String skillGroup) {
+    public DialogSkillResponse(List<Object> messages, List<DialogRequirement> requirements, String skillGroup) {
         super(messages, requirements);
         this.skillGroup = skillGroup;
     }

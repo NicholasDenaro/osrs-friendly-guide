@@ -9,7 +9,7 @@ import java.util.List;
 
 public class DialogExploreResponse extends DialogResponse
 {
-    public DialogExploreResponse(List<String> messages, List<DialogRequirement> requirements) {
+    public DialogExploreResponse(List<Object> messages, List<DialogRequirement> requirements) {
         super(messages, requirements);
     }
 }

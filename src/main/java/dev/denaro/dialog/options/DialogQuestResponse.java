@@ -10,7 +10,7 @@ import java.util.List;
 public class DialogQuestResponse extends DialogResponse
 {
     public String quest;
-    public DialogQuestResponse(List<String> messages, List<DialogRequirement> requirements, String quest) {
+    public DialogQuestResponse(List<Object> messages, List<DialogRequirement> requirements, String quest) {
         super(messages, requirements);
         this.quest = quest;
     }

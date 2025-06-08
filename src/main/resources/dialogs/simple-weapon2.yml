@@ -10,3 +10,7 @@ requirements:
     level: 85
 messages:
   - Whips are a great weapon.
+  - text: You can get one from the Grand Exchange or from an Abyssal Demon if you have the slayer level.
+    if: not ironman
+  - text: You can get one from an Abyssal Demon.
+    if: ironman

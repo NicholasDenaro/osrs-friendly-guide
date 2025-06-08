@@ -6,7 +6,7 @@ import java.util.List;
 
 public class DialogMoneyResponse extends DialogResponse
 {
-    public DialogMoneyResponse(List<String> messages, List<DialogRequirement> requirements) {
+    public DialogMoneyResponse(List<Object> messages, List<DialogRequirement> requirements) {
         super(messages, requirements);
     }
 }

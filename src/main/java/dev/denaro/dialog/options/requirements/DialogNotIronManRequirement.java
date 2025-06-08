@@ -1,23 +1,21 @@
 package dev.denaro.dialog.options.requirements;
 
 import net.runelite.api.Client;
-import net.runelite.api.Player;
-import net.runelite.api.Skill;
 import net.runelite.api.Varbits;
 import net.runelite.api.annotations.Component;
 
 import java.util.Map;
 
 @Component
-public class DialogNotIronRequirement extends DialogRequirement
+public class DialogNotIronManRequirement extends DialogRequirement
 {
     static
     {
-        DialogRequirement.RegisterCreateCall("notiron", DialogNotIronRequirement::create);
+        DialogRequirement.RegisterCreateCall("notironman", DialogNotIronManRequirement::create);
     }
-    public static DialogNotIronRequirement create(Map<String, Object> requirementMap)
+    public static DialogNotIronManRequirement create(Map<String, Object> requirementMap)
     {
-        return new DialogNotIronRequirement();
+        return new DialogNotIronManRequirement();
     }
 
     @Override

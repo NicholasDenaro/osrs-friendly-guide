@@ -102,6 +102,20 @@ public class DialogBox extends ChatboxInput
             DialogOption dialogOption = (DialogOption) dialog;
 
             int yPos = 0;
+
+            Widget talker = chatbox.createChild(-1, WidgetType.TEXT);
+            talker.setText("Select an option");
+            talker.setTextColor(0x800000);
+            talker.setFontId(FontID.QUILL_8);
+            talker.setOriginalX(X_OFFSET + 0);
+            talker.setOriginalY(Y_OFFSET + yPos);
+            talker.setOriginalWidth(479);
+            talker.setOriginalHeight(20);
+            talker.setXTextAlignment(WidgetTextAlignment.CENTER);
+            talker.setYTextAlignment(WidgetTextAlignment.CENTER);
+            talker.revalidate();
+            yPos += 20;
+
             for (int i = 0; i < dialogOption.options.length; i++)
             {
                 int finalI = i + 1;
@@ -111,9 +125,9 @@ public class DialogBox extends ChatboxInput
                 text.setTextColor(Color.BLACK.getRGB());
                 text.setFontId(FontID.QUILL_8);
                 text.setOriginalX(X_OFFSET + 0);
-                text.setOriginalY(Y_OFFSET + 15 + yPos);
+                text.setOriginalY(Y_OFFSET + yPos);
                 text.setOriginalWidth(479);
-                text.setOriginalHeight(30);
+                text.setOriginalHeight(16);
                 text.setXTextAlignment(WidgetTextAlignment.CENTER);
                 text.setYTextAlignment(WidgetTextAlignment.LEFT);
                 text.setAction(0, message.text);
@@ -130,7 +144,7 @@ public class DialogBox extends ChatboxInput
                 text.setHasListener(true);
                 text.revalidate();
 
-                yPos += 20;
+                yPos += 16;
             }
 
         }

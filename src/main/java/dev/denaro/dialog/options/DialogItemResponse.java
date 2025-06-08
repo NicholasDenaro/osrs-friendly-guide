@@ -7,7 +7,7 @@ import java.util.List;
 public class DialogItemResponse extends DialogResponse
 {
     public String itemType;
-    public DialogItemResponse(List<String> messages, List<DialogRequirement> requirements, String itemType) {
+    public DialogItemResponse(List<Object> messages, List<DialogRequirement> requirements, String itemType) {
         super(messages, requirements);
         this.itemType = itemType;
     }
@@ -20,6 +20,6 @@ public class DialogItemResponse extends DialogResponse
     @Override
     public String toString()
     {
-        return "DialogItemResponse " + itemType + " " + this.requirements + " " + this.messages;
+        return "DialogItemResponse " + itemType + " " + this.requirements;
     }
 }

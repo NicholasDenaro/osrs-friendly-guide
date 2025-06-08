@@ -1,6 +1,6 @@
 type: Money
 requirements:
-  - type: NotIron
+  - type: NotIronMan
   - type: Skill
     name: Crafting
     level: 5
