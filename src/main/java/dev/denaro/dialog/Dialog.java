@@ -18,6 +18,17 @@ public abstract class Dialog
 {
     public static Map<DialogType, List<DialogResponse>> dialogResponses = new HashMap();
 
+    protected Dialog()
+    {
+
+    }
+
+    private Runnable runnable;
+    protected Dialog(Runnable runnable)
+    {
+        this.runnable = runnable;
+    }
+
     private Dialog next;
     public Dialog setNext(Dialog next)
     {
@@ -27,41 +38,49 @@ public abstract class Dialog
 
     public Dialog next()
     {
+        if (this.runnable != null)
+        {
+            this.runnable.run();
+        }
         return this.next;
     }
 
     public static Dialog createDialogTree(FriendlyGuidePlugin plugin)
     {
-        Dialog dialog = new DialogMessage(DialogMessage.DialogSpeaker.Player, "Hello. Who are you?");
+        Dialog intro = new DialogMessage(DialogMessage.DialogSpeaker.Player, "Hello. Who are you?");
 
 
-        dialog.setNext(new DialogMessage(DialogMessage.DialogSpeaker.Guide, "I'm the Friendly Guide."))
+        Dialog endIntro = intro.setNext(new DialogMessage(DialogMessage.DialogSpeaker.Guide, "I'm the Friendly Guide."))
             .setNext(new DialogMessage(DialogMessage.DialogSpeaker.Player, "What can you do for me?"))
             .setNext(new DialogMessage(DialogMessage.DialogSpeaker.Guide, "I can give you ideas for what to do next."))
-            .setNext(new DialogMessage(DialogMessage.DialogSpeaker.Player, "That sounds nice."))
-            .setNext(new DialogOption(
-                    new DialogOption.Option[]{
-                            new DialogOption.Option("Combat", () -> Dialog.buildOption(plugin, getCombatResponses())),
-                            new DialogOption.Option("Quest", () -> Dialog.buildOption(plugin, getQuestResponses(), dr -> dr.isQuestUnstarted(plugin.getClient()))),
-                            new DialogOption.Option("Money", () -> Dialog.buildOption(plugin, getMoneyResponses())),
-                            new DialogOption.Option("Skill", () -> new DialogOption(new DialogOption.Option[]{
-                                    new DialogOption.Option("Gather", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Gather"))),
-                                    new DialogOption.Option("Refine", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Refine"))),
-                                    new DialogOption.Option("Combat", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Combat"))),
-                                    new DialogOption.Option("Other", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Other"))),
-                            })),
-                            new DialogOption.Option("Item", () -> new DialogOption(new DialogOption.Option[]{
-                                    new DialogOption.Option("Weapon", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Weapon"))),
-                                    new DialogOption.Option("Armor", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Armor"))),
-                                    new DialogOption.Option("Potion", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Potion"))),
-                                    new DialogOption.Option("Teleport", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Teleport"))),
-                                    new DialogOption.Option("Food", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Food"))),
-                            })),
-                            new DialogOption.Option("Explore", () -> Dialog.buildOption(plugin, getExploreResponses())),
-                    })
-            );
+            .setNext(new DialogMessage(DialogMessage.DialogSpeaker.Player, "That sounds nice.", plugin::setIntroduced));
 
-        return dialog;
+
+
+        Dialog options = new DialogOption(
+                new DialogOption.Option[]{
+                        new DialogOption.Option("Combat", () -> Dialog.buildOption(plugin, getCombatResponses())),
+                        new DialogOption.Option("Quest", () -> Dialog.buildOption(plugin, getQuestResponses(), dr -> dr.isQuestUnstarted(plugin.getClient()))),
+                        new DialogOption.Option("Money", () -> Dialog.buildOption(plugin, getMoneyResponses())),
+                        new DialogOption.Option("Skill", () -> new DialogOption(new DialogOption.Option[]{
+                                new DialogOption.Option("Gather", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Gather"))),
+                                new DialogOption.Option("Refine", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Refine"))),
+                                new DialogOption.Option("Combat", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Combat"))),
+                                new DialogOption.Option("Other", () -> Dialog.buildOption(plugin, getSkillResponses(), dr -> dr.isSkillGroup("Other"))),
+                        })),
+                        new DialogOption.Option("Item", () -> new DialogOption(new DialogOption.Option[]{
+                                new DialogOption.Option("Weapon", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Weapon"))),
+                                new DialogOption.Option("Armor", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Armor"))),
+                                new DialogOption.Option("Potion", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Potion"))),
+                                new DialogOption.Option("Teleport", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Teleport"))),
+                                new DialogOption.Option("Food", () -> Dialog.buildOption(plugin, getItemResponses(), dr -> dr.isItemType("Food"))),
+                        })),
+                        new DialogOption.Option("Explore", () -> Dialog.buildOption(plugin, getExploreResponses())),
+                });
+
+        endIntro.setNext(options);
+
+        return plugin.getConfig().showIntroduction() ? intro : options;
     }
 
     private static Stream<DialogCombatResponse> getCombatResponses()

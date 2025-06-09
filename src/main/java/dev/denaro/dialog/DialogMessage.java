@@ -11,4 +11,11 @@ public class DialogMessage extends Dialog
         this.speaker = speaker;
         this.message = message;
     }
+
+    public DialogMessage(DialogSpeaker speaker, String message, Runnable runnable)
+    {
+        super(runnable);
+        this.speaker = speaker;
+        this.message = message;
+    }
 }

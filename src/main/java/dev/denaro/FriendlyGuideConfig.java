@@ -4,7 +4,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("example")
+@ConfigGroup("friendlyGuide")
 public interface FriendlyGuideConfig extends Config
 {
 	@ConfigItem(
@@ -17,10 +17,18 @@ public interface FriendlyGuideConfig extends Config
 		return "Hello";
 	}
 
+
+	@ConfigItem(
+			keyName = "introduction",
+			name = "Introduction",
+			description = "Show an introduction to the player about the friendly guide"
+	)
+	default boolean showIntroduction() { return true; }
+
 	@ConfigItem(
 			keyName = "model_ids",
 			name = "Model Ids",
 			description = "comma separated list of ids"
 	)
-	default String modelIds() { return "214, 250, 5674, 5668, 5672, 7123, 12799"; }
+	default String modelIds() { return "214, 250, 5674, 5668, 5672, 7123"; }
 }

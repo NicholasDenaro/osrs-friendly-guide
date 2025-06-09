@@ -17,6 +17,7 @@ import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.menus.MenuManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 
@@ -36,6 +37,12 @@ public class FriendlyGuidePlugin extends Plugin
 	@Inject
 	private FriendlyGuideConfig config;
 
+	@Inject
+	private ConfigManager configManager;
+
+	@Inject
+	private OverlayManager overlayManager;
+
 	@Getter
 	@Inject
 	private ChatMessageManager chatMessageManager;
@@ -53,10 +60,9 @@ public class FriendlyGuidePlugin extends Plugin
 	@Inject
 	private ClientThread clientThread;
 
-	private DialogBox dialog;
 	private Guide guide;
 	private Tooltip tooltip;
-	private boolean infoBoxAdded = false;
+	private FriendlyGuideOverlay overlay;
 
 	@Override
 	protected void startUp() throws Exception
@@ -64,12 +70,18 @@ public class FriendlyGuidePlugin extends Plugin
 		log.info("Friendly Guide started!");
 
 		this.tooltip = new Tooltip("Talk to Friendly Guide");
+		this.overlayManager.add(overlay = new FriendlyGuideOverlay());
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
 		log.info("Example stopped!");
+	}
+
+	public void setIntroduced()
+	{
+		this.configManager.setConfiguration("friendlyGuide", "introduction", false);
 	}
 
 	@Subscribe
@@ -87,7 +99,6 @@ public class FriendlyGuidePlugin extends Plugin
 		return configManager.getConfig(FriendlyGuideConfig.class);
 	}
 
-
 	@Subscribe
 	public void onCommandExecuted(CommandExecuted command)
 	{
@@ -95,8 +106,7 @@ public class FriendlyGuidePlugin extends Plugin
 		String cmd = command.getCommand();
 		if (cmd.equals("guide"))
 		{
-			this.dialog = new DialogBox(this, Dialog.createDialogTree(this));
-			this.chatboxPanelManager.openInput(this.dialog);
+			this.chatboxPanelManager.openInput(new DialogBox(this, Dialog.createDialogTree(this)));
 			System.out.println("dialog opened");
 		}
 		if (cmd.equals("spawn"))
@@ -129,8 +139,7 @@ public class FriendlyGuidePlugin extends Plugin
 	{
 		if (menuOptionClicked.getMenuOption().equalsIgnoreCase("Talk to Friendly Guide"))
 		{
-			this.dialog = new DialogBox(this, Dialog.createDialogTree(this));
-			this.chatboxPanelManager.openInput(this.dialog);
+			this.chatboxPanelManager.openInput(new DialogBox(this, Dialog.createDialogTree(this)));
 
 			return;
 		}
@@ -143,10 +152,18 @@ public class FriendlyGuidePlugin extends Plugin
 			{
 				System.out.println("clicked guide");
 
-				this.dialog = new DialogBox(this, Dialog.createDialogTree(this));
-				this.chatboxPanelManager.openInput(this.dialog);
+				this.chatboxPanelManager.openInput(new DialogBox(this, Dialog.createDialogTree(this)));
+
+				this.overlay.setClick(point);
 
 				menuOptionClicked.consume();
+			}
+			else
+			{
+				if (menuOptionClicked.getMenuAction() != MenuAction.CANCEL && this.chatboxPanelManager.getCurrentInput() instanceof DialogBox)
+				{
+					this.chatboxPanelManager.close();
+				}
 			}
 		}
 	}
