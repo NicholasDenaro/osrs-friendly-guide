@@ -39,7 +39,7 @@ public class FriendlyGuideOverlay extends Overlay
 
         public void render(Graphics2D graphics)
         {
-            BufferedImage image = images[(int)(timer-- * 1.0 / 16 * 3)];
+            BufferedImage image = images[(int)(3 - (timer-- * 1.0 / 16 * 3))];
             graphics.drawImage(image, this.point.getX() - image.getWidth() / 2, this.point.getY() - image.getHeight() / 2, null);
         }
 

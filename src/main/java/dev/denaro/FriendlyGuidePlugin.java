@@ -3,6 +3,7 @@ package dev.denaro;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 
+import com.google.inject.name.Named;
 import dev.denaro.dialog.Dialog;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +19,10 @@ import net.runelite.client.menus.MenuManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
-import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 
 import java.awt.*;
+import java.util.Arrays;
 
 @Slf4j
 @PluginDescriptor(
@@ -60,23 +61,28 @@ public class FriendlyGuidePlugin extends Plugin
 	@Inject
 	private ClientThread clientThread;
 
-	private Guide guide;
-	private Tooltip tooltip;
 	private FriendlyGuideOverlay overlay;
+
+	@Inject
+	@Named("developerMode") boolean developerMode;
+
 
 	@Override
 	protected void startUp() throws Exception
 	{
 		log.info("Friendly Guide started!");
 
-		this.tooltip = new Tooltip("Talk to Friendly Guide");
 		this.overlayManager.add(overlay = new FriendlyGuideOverlay());
+
+		Guide.firstLoad(this, this.clientThread);
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		log.info("Example stopped!");
+		log.info("Friendly Guide stopped!");
+
+		Guide.unload(this.clientThread);
 	}
 
 	public void setIntroduced()
@@ -85,11 +91,27 @@ public class FriendlyGuidePlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
+	public void onClientTick(ClientTick tick)
 	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
+		Guide.tickAll();
+
+		if (client.isMenuOpen())
 		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
+			return;
+		}
+
+		for (Guide guide : Guide.allGuides())
+		{
+			Shape shape = Perspective.getClickbox(this.client, guide.getModel(), guide.getOrientation(), guide.getX(), guide.getY(), guide.getZ());
+			Point point = this.client.getMouseCanvasPosition();
+			if (shape != null && shape.contains(point.getX(), point.getY()))
+			{
+				MenuEntry entry = this.client.getMenu().createMenuEntry(-1);
+				entry.setOption("Talk to Friendly Guide");
+				entry.setType(MenuAction.CANCEL);
+				Arrays.stream(this.client.getMenu().getMenuEntries()).filter(e -> e.getOption().equalsIgnoreCase("walk here")).findFirst().get().setDeprioritized(true);
+
+			}
 		}
 	}
 
@@ -102,34 +124,13 @@ public class FriendlyGuidePlugin extends Plugin
 	@Subscribe
 	public void onCommandExecuted(CommandExecuted command)
 	{
-		System.out.println(command.getCommand());
-		String cmd = command.getCommand();
-		if (cmd.equals("guide"))
+		if (developerMode)
 		{
-			this.chatboxPanelManager.openInput(new DialogBox(this, Dialog.createDialogTree(this)));
-			System.out.println("dialog opened");
-		}
-		if (cmd.equals("spawn"))
-		{
-			this.guide = new Guide(this);
-			this.guide.show();
-		}
-	}
-
-	@Subscribe
-	public void onMenuOpened(MenuOpened event)
-	{
-		if (this.guide != null)
-		{
-			Shape shape = Perspective.getClickbox(this.client, this.guide.getModel(), this.guide.getOrientation(), this.guide.getX(), this.guide.getY(), this.guide.getZ());
-			Point point = this.client.getMouseCanvasPosition();
-			if (shape != null && shape.contains(point.getX(), point.getY()))
+			System.out.println(command.getCommand());
+			String cmd = command.getCommand();
+			if (cmd.equals("guide"))
 			{
-				clientThread.invokeLater(() -> {
-					MenuEntry entry = this.client.getMenu().createMenuEntry(-1);
-					entry.setOption("Talk to Friendly Guide");
-					entry.setType(MenuAction.CANCEL);
-				});
+				this.chatboxPanelManager.openInput(new DialogBox(this, Dialog.createDialogTree(this)));
 			}
 		}
 	}
@@ -141,48 +142,14 @@ public class FriendlyGuidePlugin extends Plugin
 		{
 			this.chatboxPanelManager.openInput(new DialogBox(this, Dialog.createDialogTree(this)));
 
-			return;
-		}
-
-		if (this.guide != null)
-		{
-			Shape shape = Perspective.getClickbox(this.client, this.guide.getModel(), this.guide.getOrientation(), this.guide.getX(), this.guide.getY(), this.guide.getZ());
 			Point point = this.client.getMouseCanvasPosition();
-			if (shape != null && shape.contains(point.getX(), point.getY()))
-			{
-				System.out.println("clicked guide");
-
-				this.chatboxPanelManager.openInput(new DialogBox(this, Dialog.createDialogTree(this)));
-
-				this.overlay.setClick(point);
-
-				menuOptionClicked.consume();
-			}
-			else
-			{
-				if (menuOptionClicked.getMenuAction() != MenuAction.CANCEL && this.chatboxPanelManager.getCurrentInput() instanceof DialogBox)
-				{
-					this.chatboxPanelManager.close();
-				}
-			}
+			this.overlay.setClick(point);
 		}
-	}
-
-	@Subscribe
-	public void onBeforeRender(BeforeRender beforeRender)
-	{
-		if (client.isMenuOpen())
+		else
 		{
-			return;
-		}
-
-		if (this.guide != null)
-		{
-			Shape shape = Perspective.getClickbox(this.client, this.guide.getModel(), this.guide.getOrientation(), this.guide.getX(), this.guide.getY(), this.guide.getZ());
-			Point point = this.client.getMouseCanvasPosition();
-			if (shape != null && shape.contains(point.getX(), point.getY()))
+			if (menuOptionClicked.getMenuAction() != MenuAction.CANCEL && this.chatboxPanelManager.getCurrentInput() instanceof DialogBox)
 			{
-				tooltipManager.add(this.tooltip);
+				this.chatboxPanelManager.close();
 			}
 		}
 	}
