@@ -21,4 +21,19 @@ public interface FriendlyGuideConfig extends Config
 			hidden = true
 	)
 	default String modelIds() { return "214, 250, 5674, 5668, 5672, 7123"; }
+
+	@ConfigItem(
+			keyName = "etag",
+			name = "Etag",
+			description = "Used to download new dialogs only when necessary"
+	)
+	default String etag() { return ""; }
+
+	@ConfigItem(
+			keyName = "data",
+			name = "Data",
+			description = "Data used for guide responses",
+			hidden = true
+	)
+	default String data() { return ""; }
 }

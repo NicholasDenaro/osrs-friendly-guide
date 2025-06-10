@@ -17,7 +17,7 @@ public class DialogQuestResponse extends DialogResponse
 
     public boolean isQuestUnstarted(Client client)
     {
-        String enumName = this.quest.toUpperCase().replaceAll(" ", "_");
+        String enumName = this.quest.toUpperCase().replaceAll(" ", "_").replaceAll("'", "");
         try
         {
             QuestState state = Quest.valueOf(enumName).getState(client);

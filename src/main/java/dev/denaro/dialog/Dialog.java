@@ -10,9 +10,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public abstract class Dialog
 {
@@ -141,6 +143,23 @@ public abstract class Dialog
         return list.get(index).createDialog(plugin.getClient());
     }
 
+    public static void loadDynamicYaml(String yamlString)
+    {
+        System.out.println("Parsing dynamic yaml data");
+        AtomicInteger counter = new AtomicInteger(0);
+        Yaml yaml = new Yaml();
+        Stream<Object> stream = StreamSupport.stream(yaml.loadAll(yamlString).spliterator(), false);
+        stream.forEach(doc -> {
+            System.out.println("Loading doc: " + doc);
+            Map<String, Object> document = (Map<String, Object>)doc;
+
+            loadDocument(document);
+            System.out.println("doc loaded");
+            counter.incrementAndGet();
+        });
+        System.out.println("loaded " + counter.get() + " docs");
+    }
+
     static {
         System.out.println("loading yml files");
         Dialog.dialogResponses.put(DialogType.Combat, new ArrayList<>());
@@ -172,46 +191,7 @@ public abstract class Dialog
                     Yaml yaml = new Yaml();
                     Map<String, Object> document = yaml.load(dialogFileStream);
 
-                    String type = (String)document.get("type");
-
-                    List<Map<String, Object>> requirements = (List<Map<String, Object>>)document.get("requirements");
-                    List<Object> messages = (List<Object>)document.get("messages");
-
-                    List<DialogRequirement> requirementList = new ArrayList<>();
-                    for (Map<String, Object> requirementMap : requirements)
-                    {
-                        String requirementType = ((String)requirementMap.get("type")).toLowerCase();
-                        DialogRequirement req = DialogRequirement.New(requirementType, requirementMap);
-                        if (req != null) {
-                            requirementList.add(req);
-                        }
-                    }
-
-                    switch (type.toLowerCase())
-                    {
-                        case "combat":
-                            Dialog.dialogResponses.get(DialogType.Combat).add(new DialogCombatResponse(messages, requirementList));
-                            break;
-                        case "item":
-                            String itemType = (String)document.get("itemType");
-                            Dialog.dialogResponses.get(DialogType.Item).add(new DialogItemResponse(messages, requirementList, itemType));
-                            break;
-                        case "money":
-                            Dialog.dialogResponses.get(DialogType.Money).add(new DialogMoneyResponse(messages, requirementList));
-                            break;
-                        case "quest":
-                            String quest = (String)document.get("quest");
-                            Dialog.dialogResponses.get(DialogType.Quest).add(new DialogQuestResponse(messages, requirementList, quest));
-                            break;
-                        case "explore":
-                            Dialog.dialogResponses.get(DialogType.Explore).add(new DialogExploreResponse(messages, requirementList));
-                            break;
-                        case "skill":
-                            String skillGroup = (String)document.get("skillGroup");
-                            Dialog.dialogResponses.get(DialogType.Skill).add(new DialogSkillResponse(messages, requirementList, skillGroup));
-                            break;
-
-                    }
+                    loadDocument(document);
                 }
             }
 
@@ -228,5 +208,48 @@ public abstract class Dialog
             exception.printStackTrace();
         }
 
+    }
+
+    private static void loadDocument(Map<String, Object> document)
+    {
+        String type = (String)document.get("type");
+
+        List<Map<String, Object>> requirements = (List<Map<String, Object>>)document.getOrDefault("requirements", new ArrayList<>());
+        List<Object> messages = (List<Object>)document.get("messages");
+
+        List<DialogRequirement> requirementList = new ArrayList<>();
+        for (Map<String, Object> requirementMap : requirements)
+        {
+            String requirementType = ((String)requirementMap.get("type")).toLowerCase();
+            DialogRequirement req = DialogRequirement.New(requirementType, requirementMap);
+            if (req != null) {
+                requirementList.add(req);
+            }
+        }
+
+        switch (type.toLowerCase())
+        {
+            case "combat":
+                Dialog.dialogResponses.get(DialogType.Combat).add(new DialogCombatResponse(messages, requirementList));
+                break;
+            case "item":
+                String itemType = (String)document.get("itemType");
+                Dialog.dialogResponses.get(DialogType.Item).add(new DialogItemResponse(messages, requirementList, itemType));
+                break;
+            case "money":
+                Dialog.dialogResponses.get(DialogType.Money).add(new DialogMoneyResponse(messages, requirementList));
+                break;
+            case "quest":
+                String quest = (String)document.get("quest");
+                Dialog.dialogResponses.get(DialogType.Quest).add(new DialogQuestResponse(messages, requirementList, quest));
+                break;
+            case "explore":
+                Dialog.dialogResponses.get(DialogType.Explore).add(new DialogExploreResponse(messages, requirementList));
+                break;
+            case "skill":
+                String skillGroup = (String)document.get("skillGroup");
+                Dialog.dialogResponses.get(DialogType.Skill).add(new DialogSkillResponse(messages, requirementList, skillGroup));
+                break;
+        }
     }
 }
