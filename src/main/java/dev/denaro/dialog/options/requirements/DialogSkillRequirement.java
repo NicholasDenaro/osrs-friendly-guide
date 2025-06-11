@@ -39,7 +39,7 @@ public class DialogSkillRequirement extends DialogRequirement
     }
 
     @Override
-    public boolean isMet(Client client)
+    public boolean _isMet(Client client)
     {
         Player player = client.getLocalPlayer();
         if (this.skill.equals("Combat"))

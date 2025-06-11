@@ -10,7 +10,6 @@ import java.util.Map;
 @Component
 public class DialogMusicRequirement extends DialogRequirement
 {
-    String quest;
     String track;
     private Boolean isMet = null;
 
@@ -21,15 +20,14 @@ public class DialogMusicRequirement extends DialogRequirement
     public static DialogMusicRequirement create(Map<String, Object> requirementMap)
     {
         DialogMusicRequirement req = new DialogMusicRequirement();
-        req.quest = (String)requirementMap.get("name");
-        req.track = (String)requirementMap.get("track");
+        req.track = "MUSIC_" + ((String)requirementMap.get("track")).replaceAll(" ", "_").toUpperCase();
 
         req.setup(requirementMap);
         return req;
     }
 
     @Override
-    public boolean isMet(Client client)
+    public boolean _isMet(Client client)
     {
         if (isMet != null)
         {
@@ -48,7 +46,8 @@ public class DialogMusicRequirement extends DialogRequirement
             return unlocked;
         } catch (Exception ignored)
         {
-
+            System.out.println(("failed to check music requirement"));
+            ignored.printStackTrace();
         }
         return false;
     }

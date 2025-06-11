@@ -1,8 +1,8 @@
 package dev.denaro.dialog.options.requirements;
 
 import dev.denaro.dialog.Dialog;
+import dev.denaro.dialog.options.conditions.DialogCondition;
 import net.runelite.api.Client;
-import net.runelite.api.Varbits;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -61,23 +61,31 @@ public abstract class DialogRequirement
     }
 
     private String condition;
+    private boolean negate;
 
     protected void setup(Map<String, Object> requirementMap)
     {
         this.condition = (String)requirementMap.get("if");
-        if (this.condition != null)
-        {
-            System.out.println(this + " has the condition: " + this.condition);
-        }
+        this.negate = (Boolean)requirementMap.getOrDefault("negate", false);
     }
 
-    public abstract boolean isMet(Client client);
+    public abstract boolean _isMet(Client client);
 
-    public boolean isRequirementRequired(Client client)
+    public boolean isMet(Client client)
     {
-        if ("ironman".equals(this.condition) && client.getVarbitValue(Varbits.ACCOUNT_TYPE) == 0)
+        if (isRequirementRequired(client))
         {
-            // Skip ("pass") since account type 0 is not ironman
+            return _isMet(client) == !this.negate;
+        }
+
+        return true;
+    }
+
+    private boolean isRequirementRequired(Client client)
+    {
+        if (this.condition != null && DialogCondition.is(this.condition, client))
+        {
+            // Skip ("pass")
             return false;
         }
 

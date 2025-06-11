@@ -19,7 +19,7 @@ public class DialogNotIronManRequirement extends DialogRequirement
     }
 
     @Override
-    public boolean isMet(Client client) {
+    public boolean _isMet(Client client) {
         return client.getVarbitValue(Varbits.ACCOUNT_TYPE) == 0;
     }
 }

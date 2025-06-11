@@ -128,7 +128,7 @@ public abstract class Dialog
     private static <T extends DialogResponse> Dialog buildOption(FriendlyGuidePlugin plugin, Stream<T> dialogs, Predicate<T> predicate)
     {
         List<T> list = dialogs.peek(System.out::println).filter(predicate).filter(response ->
-                response.requirements.stream().allMatch(requirement -> !requirement.isRequirementRequired(plugin.getClient()) || requirement.isMet(plugin.getClient()))
+                response.requirements.stream().allMatch(requirement -> requirement.isMet(plugin.getClient()))
         ).collect(Collectors.toList());
 
         System.out.println("Filtered dialogs:" + list);

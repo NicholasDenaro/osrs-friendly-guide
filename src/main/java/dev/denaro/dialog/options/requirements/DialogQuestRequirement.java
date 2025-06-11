@@ -10,6 +10,7 @@ public class DialogQuestRequirement extends DialogRequirement
 {
     String quest;
     String status;
+    String atleast;
 
     static
     {
@@ -20,25 +21,43 @@ public class DialogQuestRequirement extends DialogRequirement
         DialogQuestRequirement req = new DialogQuestRequirement();
         req.quest =(String)requirementMap.get("name");
         req.status = (String)requirementMap.get("status");
+        req.atleast = (String)requirementMap.get("minimum");
 
         req.setup(requirementMap);
         return req;
     }
 
     @Override
-    public boolean isMet(Client client) {
-        QuestState state = Quest.valueOf(this.quest.toUpperCase().replaceAll(" ", "_")).getState(client);
+    public boolean _isMet(Client client) {
+        QuestState state = Quest.valueOf(this.quest.toUpperCase().replaceAll(" ", "_").replaceAll("'", "")).getState(client);
 
-        switch (this.status.toLowerCase())
+        if (this.status != null)
         {
-            case "not started":
-                return state == QuestState.NOT_STARTED;
-            case "in progress":
-                return state == QuestState.IN_PROGRESS;
-            case "complete":
-                return state == QuestState.FINISHED;
-            default:
-                return false;
+            switch (this.status.toLowerCase())
+            {
+                case "not started":
+                    return state == QuestState.NOT_STARTED;
+                case "in progress":
+                    return state == QuestState.IN_PROGRESS;
+                case "complete":
+                    return state == QuestState.FINISHED;
+                default:
+                    return false;
+            }
+        }
+        else
+        {
+            switch (this.status.toLowerCase())
+            {
+                case "not started":
+                    return true;
+                case "in progress":
+                    return state == QuestState.IN_PROGRESS || state == QuestState.FINISHED;
+                case "complete":
+                    return state == QuestState.FINISHED;
+                default:
+                    return false;
+            }
         }
     }
 }
