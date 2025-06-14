@@ -3,7 +3,7 @@ package dev.denaro.dialog;
 import dev.denaro.FriendlyGuidePlugin;
 import dev.denaro.dialog.options.*;
 import dev.denaro.dialog.options.requirements.*;
-import org.yaml.snakeyaml.Yaml;
+import dev.denaro.yaml.Yaml;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -147,17 +147,22 @@ public abstract class Dialog
     {
         System.out.println("Parsing dynamic yaml data");
         AtomicInteger counter = new AtomicInteger(0);
-        Yaml yaml = new Yaml();
-        Stream<Object> stream = StreamSupport.stream(yaml.loadAll(yamlString).spliterator(), false);
-        stream.forEach(doc -> {
-            System.out.println("Loading doc: " + doc);
-            Map<String, Object> document = (Map<String, Object>)doc;
-
-            loadDocument(document);
-            System.out.println("doc loaded");
-            counter.incrementAndGet();
-        });
-        System.out.println("loaded " + counter.get() + " docs");
+//        try
+//        {
+//            Stream<Map<String, Object>> stream = Yaml.loadAll(yamlString).stream();
+//            stream.forEach(doc -> {
+//                System.out.println("Loading doc: " + doc);
+//
+//                loadDocument(doc);
+//                System.out.println("doc loaded");
+//                counter.incrementAndGet();
+//            });
+//            System.out.println("loaded " + counter.get() + " docs");
+//        }
+//        catch (IOException ioException)
+//        {
+//            ioException.printStackTrace();
+//        }
     }
 
     static {
@@ -186,12 +191,11 @@ public abstract class Dialog
             {
                 InputStream dialogFileStream = Dialog.class.getResourceAsStream(file);
                 if (dialogFileStream != null)
-                {
+{
                     System.out.println("Loading file: " + file);
-                    Yaml yaml = new Yaml();
-                    Map<String, Object> document = yaml.load(dialogFileStream);
+//                    Map<String, Object> document = new Yaml().load(dialogFileStream);
 
-                    loadDocument(document);
+//                    loadDocument(document);
                 }
             }
 

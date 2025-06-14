@@ -1,0 +1,10 @@
+type: Combat
+requirements:
+  - type: Skill
+    name: Combat
+    level: 40
+    levelMax: 128
+messages:
+  - Vannaka can give you a slayer task.
+  - He's in the Edgeville Dungeon, west of Varrock.
+  - If you find a brass key, you can enter the dungeon from the locked house west of the cooking guild.
