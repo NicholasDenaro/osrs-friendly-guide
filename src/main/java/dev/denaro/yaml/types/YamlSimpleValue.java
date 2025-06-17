@@ -1,4 +1,4 @@
-package dev.denaro.yaml;
+package dev.denaro.yaml.types;
 
 import lombok.Getter;
 

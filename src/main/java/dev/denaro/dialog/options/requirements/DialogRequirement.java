@@ -2,8 +2,8 @@ package dev.denaro.dialog.options.requirements;
 
 import dev.denaro.dialog.Dialog;
 import dev.denaro.dialog.options.conditions.DialogCondition;
-import dev.denaro.yaml.YamlObject;
-import dev.denaro.yaml.YamlSimpleValue;
+import dev.denaro.yaml.types.YamlObject;
+import dev.denaro.yaml.types.YamlSimpleValue;
 import net.runelite.api.Client;
 
 import java.io.BufferedReader;

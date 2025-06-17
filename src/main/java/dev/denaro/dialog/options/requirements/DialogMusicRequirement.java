@@ -1,6 +1,6 @@
 package dev.denaro.dialog.options.requirements;
 
-import dev.denaro.yaml.YamlObject;
+import dev.denaro.yaml.types.YamlObject;
 import net.runelite.api.Client;
 import net.runelite.api.annotations.Component;
 import net.runelite.api.gameval.DBTableID;

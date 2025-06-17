@@ -4,10 +4,10 @@ import dev.denaro.dialog.Dialog;
 import dev.denaro.dialog.DialogMessage;
 import dev.denaro.dialog.options.conditions.DialogCondition;
 import dev.denaro.dialog.options.requirements.DialogRequirement;
-import dev.denaro.yaml.YamlArray;
-import dev.denaro.yaml.YamlObject;
-import dev.denaro.yaml.YamlSimpleValue;
-import dev.denaro.yaml.YamlValue;
+import dev.denaro.yaml.types.YamlArray;
+import dev.denaro.yaml.types.YamlObject;
+import dev.denaro.yaml.types.YamlSimpleValue;
+import dev.denaro.yaml.types.YamlValue;
 import net.runelite.api.Client;
 
 import java.util.List;

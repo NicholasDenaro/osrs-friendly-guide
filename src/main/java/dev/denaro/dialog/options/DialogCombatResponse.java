@@ -1,7 +1,7 @@
 package dev.denaro.dialog.options;
 
 import dev.denaro.dialog.options.requirements.DialogRequirement;
-import dev.denaro.yaml.YamlArray;
+import dev.denaro.yaml.types.YamlArray;
 
 import java.util.List;
 

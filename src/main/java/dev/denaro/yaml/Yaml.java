@@ -1,6 +1,13 @@
 package dev.denaro.yaml;
 
-import lombok.Getter;
+import dev.denaro.yaml.parser.TokenReader;
+import dev.denaro.yaml.parser.YamlLine;
+import dev.denaro.yaml.parser.YamlToken;
+import dev.denaro.yaml.parser.YamlTokenType;
+import dev.denaro.yaml.types.YamlArray;
+import dev.denaro.yaml.types.YamlObject;
+import dev.denaro.yaml.types.YamlSimpleValue;
+import dev.denaro.yaml.types.YamlValue;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -10,44 +17,7 @@ import java.util.stream.Collectors;
 
 public class Yaml
 {
-    enum YamlTokenType {whitespace, string, array_index, kvp_splitter, comment, new_line, folded_block, literal_block};
-    private static class YamlToken
-    {
-        public String value;
-        public YamlTokenType type;
-        private YamlToken nextToken;
-
-        public YamlToken(YamlTokenType type, String value)
-        {
-            this.type = type;
-            this.value = value;
-        }
-
-        public String toString()
-        {
-            String val = this.value;
-            if (val.equals("\n"))
-            {
-                val = "<nl>";
-            }
-            else if (val.equals("\r"))
-            {
-                val = "<rc>";
-            }
-
-            return "<" + this.type + "=" + val + ">";
-        }
-
-        public void setNext(YamlToken next)
-        {
-            this.nextToken = next;
-        }
-
-        public YamlToken next()
-        {
-            return this.nextToken;
-        }
-    }
+    ;
 
     private BufferedReader reader;
     public Yaml()
@@ -257,170 +227,6 @@ public class Yaml
         System.out.println(tokens);
 
         return tokens;
-    }
-
-    private static class YamlLine
-    {
-        private final ArrayList<YamlToken> line;
-
-        public YamlLine(ArrayList<YamlToken> line)
-        {
-            this.line = line;
-        }
-
-        public int getDepth()
-        {
-            if (line.isEmpty())
-            {
-                return 0;
-            }
-
-            if (line.get(0).type == YamlTokenType.whitespace)
-            {
-                return line.get(0).value.length();
-            }
-
-            return 0;
-        }
-
-        public YamlToken get(YamlTokenType type)
-        {
-            return line.stream().filter(token -> token.type == type).findFirst().orElse(null);
-        }
-
-        public YamlToken firstRealToken()
-        {
-            return this.line.stream()
-                    .filter(token -> token.type != YamlTokenType.comment && token.type != YamlTokenType.whitespace && token.type != YamlTokenType.new_line)
-                    .findFirst().orElse(null);
-        }
-
-
-        public YamlToken firstNonWhitespaceToken()
-        {
-            return this.line.stream()
-                    .filter(token -> token.type != YamlTokenType.whitespace && token.type != YamlTokenType.new_line)
-                    .findFirst().orElse(null);
-        }
-
-        public boolean hasComment()
-        {
-            return this.line.stream().anyMatch(token -> token.type == YamlTokenType.comment);
-        }
-
-        public boolean isEmpty()
-        {
-            return this.line.isEmpty() || this.line.get(0).type == YamlTokenType.new_line;
-        }
-    }
-
-    private static class TokenReader
-    {
-        private final ArrayList<YamlToken> tokens;
-        @Getter
-        private int index;
-
-        public TokenReader(ArrayList<YamlToken> tokens)
-        {
-            this.tokens = tokens;
-            index = -1;
-        }
-
-        public YamlToken next()
-        {
-            return this.tokens.get(++this.index);
-        }
-
-        public YamlLine readLine()
-        {
-            ArrayList<YamlToken> line = new ArrayList<>();
-            while (this.hasNext())
-            {
-                YamlToken t = this.next();
-                line.add(t);
-
-                if (t.type == YamlTokenType.new_line)
-                {
-                    return new YamlLine(line);
-                }
-            }
-
-            return new YamlLine(line);
-        }
-
-        public YamlLine getNextRealLine()
-        {
-            YamlLine line = readLine();
-
-            while (true)
-            {
-                if (line.isEmpty())
-                {
-                    return line;
-                }
-
-                if (line.firstRealToken() != null)
-                {
-                    return line;
-                }
-
-                line = readLine();
-            }
-        }
-
-        public YamlLine getNextNonEmptyLine()
-        {
-            YamlLine line = readLine();
-
-            while (true)
-            {
-                if (line.isEmpty())
-                {
-                    return line;
-                }
-
-                if (line.firstNonWhitespaceToken() != null)
-                {
-                    return line;
-                }
-
-                line = readLine();
-            }
-        }
-
-        public YamlToken peek()
-        {
-            return this.tokens.get(this.index + 1);
-        }
-
-        public boolean hasNext()
-        {
-            return this.index + 1 < this.tokens.size();
-        }
-
-        public YamlToken get(int i)
-        {
-            return this.tokens.get(i);
-        }
-
-        public void seek(int i)
-        {
-            this.index = i;
-        }
-
-        public void rewindLine()
-        {
-            for (int i = this.index - 1; i >= 0; i--)
-            {
-                if (this.tokens.get(i).type == YamlTokenType.new_line)
-                {
-                    this.index = i + 1;
-                    return;
-                }
-            }
-
-            this.index = 0;
-        }
     }
 
     private YamlValue parse(ArrayList<YamlToken> tokens) throws ParseException {
@@ -802,7 +608,7 @@ public class Yaml
 
             if (line.getDepth() >= depth)
             {
-                for (YamlToken token : line.line)
+                for (YamlToken token : line.getLine())
                 {
                     if (token.type != YamlTokenType.whitespace && token.type != YamlTokenType.new_line)
                     {
