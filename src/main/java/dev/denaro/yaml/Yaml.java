@@ -6,10 +6,11 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Yaml
 {
-    enum YamlTokenType {whitespace, string, array_index, kvp_splitter, comment, new_line};
+    enum YamlTokenType {whitespace, string, array_index, kvp_splitter, comment, new_line, folded_block, literal_block};
     private static class YamlToken
     {
         public String value;
@@ -24,7 +25,17 @@ public class Yaml
 
         public String toString()
         {
-            return "<" + this.type + "=" + (this.value.equals("\n") ? "<nl>" : this.value) + ">";
+            String val = this.value;
+            if (val.equals("\n"))
+            {
+                val = "<nl>";
+            }
+            else if (val.equals("\r"))
+            {
+                val = "<rc>";
+            }
+
+            return "<" + this.type + "=" + val + ">";
         }
 
         public void setNext(YamlToken next)
@@ -61,7 +72,7 @@ public class Yaml
         int val = reader.read();
         char next = (char) val;
         boolean consumedNext = false;
-        System.out.println("Start");
+        System.out.println("Start tokenization.");
         while (next != (char) 0)
         {
             char ch = next;
@@ -69,7 +80,13 @@ public class Yaml
             val = reader.read();
             next = val == -1 ? (char) 0 : (char) val;
 
-            System.out.print(ch);
+            if (next == '\r')
+            {
+                val = reader.read();
+                next = val == -1 ? (char) 0 : (char) val;
+            }
+
+//            System.out.print(ch);
             if (consumedNext)
             {
                 consumedNext = false;
@@ -165,6 +182,24 @@ public class Yaml
                         tokens.add(new YamlToken(YamlTokenType.kvp_splitter, sb.toString()));
                         sb.setLength(0);
                     }
+                    else if (sb.charAt(0) == '>')
+                    {
+                        sb.append(ch);
+
+                        tokens.add(new YamlToken(YamlTokenType.folded_block, sb.toString()));
+                        sb.setLength(0);
+                    }
+                    else if (sb.charAt(0) == '|')
+                    {
+                        sb.append(ch);
+
+                        tokens.add(new YamlToken(YamlTokenType.literal_block, sb.toString()));
+                        sb.setLength(0);
+                    }
+                    else
+                    {
+                        sb.append(ch);
+                    }
                 }
                 else
                 {
@@ -217,7 +252,8 @@ public class Yaml
             tokens.get(i - 1).setNext(tokens.get(i));
         }
 
-        System.out.println("\nend. Tokens:");
+        System.out.println("end tokenization.");
+        System.out.println("Tokens:");
         System.out.println(tokens);
 
         return tokens;
@@ -393,11 +429,20 @@ public class Yaml
             return null;
         }
 
+        while (tokens.get(0).type == YamlTokenType.new_line)
+        {
+            tokens.remove(0);
+            if (tokens.isEmpty())
+            {
+                return null;
+            }
+        }
+
         YamlToken token = tokens.stream().filter((t) -> t.type == YamlTokenType.string || t.type == YamlTokenType.array_index).findFirst().orElse(null);
 
         if (token == null)
         {
-            throw new ParseException("", 0);
+            return YamlSimpleValue.Null;
         }
 
         int index = tokens.indexOf(token);
@@ -417,6 +462,14 @@ public class Yaml
                 }
             }
             return parseArray(new TokenReader(tokens), new YamlArray(), depth);
+        }
+        else if (token.type == YamlTokenType.folded_block)
+        {
+
+        }
+        else if (token.type == YamlTokenType.literal_block)
+        {
+
         }
         else if (token.type == YamlTokenType.string)
         {
@@ -454,7 +507,7 @@ public class Yaml
     }
 
     private YamlObject parseObject(TokenReader reader, YamlObject object, int depth) throws ParseException {
-        System.out.println("Reading object");
+//        System.out.println("Reading object");
 
         while (true)
         {
@@ -481,20 +534,20 @@ public class Yaml
                     throw new ParseException("Must be a string", -1);
                 }
 
-                System.out.println("key: " + key);
+//                System.out.println("key: " + key);
 
                 YamlToken splitter = key.next();
 
                 if (splitter == null || splitter.type != YamlTokenType.kvp_splitter)
                 {
-                    throw new ParseException("Must be a ':'", -1);
+                    throw new ParseException("Must be a ':', instead found " + (splitter == null ? "null" : splitter.type), -1);
                 }
 
-                System.out.println("splitter: " + splitter);
+//                System.out.println("splitter: " + splitter);
 
                 YamlToken value = splitter.next();
 
-                System.out.println("value: " + value);
+//                System.out.println("value: " + value);
 
                 if (value == null)
                 {
@@ -542,6 +595,14 @@ public class Yaml
                         }
                     }
                 }
+                else if (value.type == YamlTokenType.literal_block)
+                {
+
+                }
+                else if (value.type == YamlTokenType.folded_block)
+                {
+
+                }
                 else if (value.type == YamlTokenType.string)
                 {
                     object.set(key.value, parseSimpleValue(reader, new YamlSimpleValue(value.value.trim()), depth + 1));
@@ -555,7 +616,7 @@ public class Yaml
     }
 
     private YamlArray parseArray(TokenReader reader, YamlArray array, int depth) throws ParseException {
-        System.out.println("Reading array");
+//        System.out.println("Reading array");
 
         while (true) {
             int startLine = reader.getIndex();
@@ -577,7 +638,7 @@ public class Yaml
                 }
                 else
                 {
-                    System.out.println("new index");
+//                    System.out.println("new index");
                     YamlToken value = arrayIndex.next();
                     if (value.type == YamlTokenType.new_line || value.type == YamlTokenType.comment)
                     {
@@ -619,6 +680,14 @@ public class Yaml
                             }
                         }
                     }
+                    else if (value.type == YamlTokenType.literal_block)
+                    {
+
+                    }
+                    else if (value.type == YamlTokenType.folded_block)
+                    {
+
+                    }
                     else if (value.type == YamlTokenType.string)
                     {
                         // check if string or object
@@ -636,7 +705,7 @@ public class Yaml
                             // dupe code
                             if (objectValue == null)
                             {
-                                System.out.println("null array value");
+//                                System.out.println("null array value");
                                 object.set(value.value, null);
                                 return array;
                             }
@@ -653,12 +722,12 @@ public class Yaml
 
                                 if (d2 < objectDepth)
                                 {
-                                    System.out.println("null array value");
+//                                    System.out.println("null array value");
                                     object.set(value.value, null);
                                 }
                                 else if (d2 == objectDepth)
                                 {
-                                    System.out.println("null array value");
+//                                    System.out.println("null array value");
                                     object.set(value.value, null);
                                 }
                                 else // d2 > objectDepth
@@ -684,7 +753,7 @@ public class Yaml
                             }
                             else if (value.type == YamlTokenType.string)
                             {
-                                System.out.println("set object value to string");
+//                                System.out.println("set object value to string");
                                 object.set(value.value, parseSimpleValue(reader, new YamlSimpleValue(objectValue.value.trim()), objectDepth + 1));
                             }
                             // end dupe code
@@ -749,11 +818,22 @@ public class Yaml
         }
     }
 
+    private YamlSimpleValue parseFoldedValue(TokenReader reader, YamlSimpleValue value, int depth)
+    {
+        return value;
+    }
+
+    private YamlSimpleValue parseLiteralValue(TokenReader reader, YamlSimpleValue value, int depth)
+    {
+        return value;
+    }
+
     public List<YamlValue> loadAll(String yamlString) throws IOException, ParseException {
         ArrayList<YamlValue> data = new ArrayList<>();
-        for(String yamlStr : yamlString.split("---"))
+        for(String yamlStr : Arrays.stream(yamlString.split("---")).filter(str -> !str.isEmpty()).collect(Collectors.toList()))
         {
-            data.add(this.load(new ByteArrayInputStream(yamlStr.getBytes(StandardCharsets.UTF_8))));
+            YamlValue val = this.load(new ByteArrayInputStream(yamlStr.getBytes(StandardCharsets.UTF_8)));
+            data.add(val);
         }
 
         return data;

@@ -1,12 +1,13 @@
 package dev.denaro.dialog.options;
 
 import dev.denaro.dialog.options.requirements.DialogRequirement;
+import dev.denaro.yaml.YamlArray;
 
 import java.util.List;
 
 public class DialogCombatResponse extends DialogResponse
 {
-    public DialogCombatResponse(List<Object> messages, List<DialogRequirement> requirements) {
+    public DialogCombatResponse(YamlArray messages, List<DialogRequirement> requirements) {
         super(messages, requirements);
     }
 }

@@ -1,8 +1,9 @@
 package dev.denaro.yaml;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
-public class YamlArray extends YamlValue
+public class YamlArray extends YamlValue implements Iterable<YamlValue>
 {
     private final ArrayList<YamlValue> values = new ArrayList<>();
 
@@ -30,5 +31,15 @@ public class YamlArray extends YamlValue
         sb.append("]");
 
         return sb.toString();
+    }
+
+    public ArrayList<YamlValue> getValues()
+    {
+        return new ArrayList<>(this.values);
+    }
+
+    @Override
+    public Iterator<YamlValue> iterator() {
+        return this.values.iterator();
     }
 }

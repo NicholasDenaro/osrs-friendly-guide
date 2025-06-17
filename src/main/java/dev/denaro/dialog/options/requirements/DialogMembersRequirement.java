@@ -1,10 +1,9 @@
 package dev.denaro.dialog.options.requirements;
 
+import dev.denaro.yaml.YamlObject;
 import net.runelite.api.Client;
 import net.runelite.api.WorldType;
 import net.runelite.api.annotations.Component;
-
-import java.util.Map;
 
 @Component
 public class DialogMembersRequirement extends DialogRequirement
@@ -13,7 +12,7 @@ public class DialogMembersRequirement extends DialogRequirement
     {
         DialogRequirement.RegisterCreateCall("members", DialogMembersRequirement::create);
     }
-    public static DialogMembersRequirement create(Map<String, Object> requirementMap)
+    public static DialogMembersRequirement create(YamlObject requirementMap)
     {
         return new DialogMembersRequirement();
     }
