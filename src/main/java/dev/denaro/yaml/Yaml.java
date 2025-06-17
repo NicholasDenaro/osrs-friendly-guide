@@ -42,7 +42,7 @@ public class Yaml
         int val = reader.read();
         char next = (char) val;
         boolean consumedNext = false;
-        System.out.println("Start tokenization.");
+//        System.out.println("Start tokenization.");
         while (next != (char) 0)
         {
             char ch = next;
@@ -222,9 +222,9 @@ public class Yaml
             tokens.get(i - 1).setNext(tokens.get(i));
         }
 
-        System.out.println("end tokenization.");
-        System.out.println("Tokens:");
-        System.out.println(tokens);
+//        System.out.println("end tokenization.");
+//        System.out.println("Tokens:");
+//        System.out.println(tokens);
 
         return tokens;
     }

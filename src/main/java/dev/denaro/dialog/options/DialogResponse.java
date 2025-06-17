@@ -15,7 +15,7 @@ import java.util.List;
 public class DialogResponse
 {
     public List<DialogRequirement> requirements;
-    private YamlArray messages;
+    private final YamlArray messages;
 
     public DialogResponse(YamlArray messages, List<DialogRequirement> requirements) {
         this.messages = messages;

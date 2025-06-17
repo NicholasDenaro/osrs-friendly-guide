@@ -131,16 +131,15 @@ public abstract class Dialog
         }
         catch (Exception ex)
         {
+            ex.printStackTrace();
             return new DialogOption(new DialogOption.Option[]{new DialogOption.Option("Error", new DialogMessage(DialogMessage.DialogSpeaker.Guide, "Error"))});
         }
     }
 
     private static <T extends DialogResponse> Dialog buildOption(FriendlyGuidePlugin plugin, Stream<T> dialogs, Predicate<T> predicate) {
-        List<T> list = dialogs.peek(System.out::println).filter(predicate).filter(response ->
+        List<T> list = dialogs.filter(predicate).filter(response ->
                 response.requirements.stream().allMatch(requirement -> requirement.isMet(plugin.getClient()))
         ).collect(Collectors.toList());
-
-        System.out.println("Filtered dialogs:" + list);
 
         if (list.isEmpty())
         {
@@ -244,7 +243,7 @@ public abstract class Dialog
     }
 
     private static void loadDocument(YamlObject document) throws Exception {
-        String type = (String)(document.getSimpleValue("type").getString());
+        String type = document.getSimpleValue("type").getString();
 
         YamlArray requirements = document.getArrayOrDefault("requirements", new YamlArray());
         YamlArray messages = document.getArray("messages");
