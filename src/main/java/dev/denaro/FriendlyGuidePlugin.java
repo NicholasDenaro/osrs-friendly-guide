@@ -22,12 +22,8 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 
 import java.awt.*;
-import java.net.*;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @PluginDescriptor(
@@ -74,62 +70,14 @@ public class FriendlyGuidePlugin extends Plugin
 	private final HttpClient httpClient = HttpClient.newHttpClient();
 
 	@Override
-	protected void startUp()
-	{
+	protected void startUp() throws InterruptedException {
 		log.info("Friendly Guide started!");
 
 		this.overlayManager.add(overlay = new FriendlyGuideOverlay());
 
 		Guide.firstLoad(this, this.clientThread);
 
-		new Thread(() -> {
-            try {
-				System.out.println("Loading cooks assistant.yml");
-                URI uri = new URI("https://github.com/NicholasDenaro/osrs-friendly-guide-responses/releases/download/Latest/merged.yml");
-				HttpRequest request = HttpRequest.newBuilder().GET().uri(uri).header("IF-NONE-MATCH", this.config.etag()).build();
-				CompletableFuture<HttpResponse<String>> future = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-				future.thenAccept(response ->
-				{
-					if (response.statusCode() == 302)
-					{
-                        try {
-                            URI redirect = new URI(response.headers().firstValue("Location").get());
-							System.out.println("Fetching contents from " + redirect.toString().split("\\?")[0]);
-							HttpRequest request2 = HttpRequest.newBuilder().GET().uri(redirect).header("IF-NONE-MATCH", this.config.etag()).build();
-							CompletableFuture<HttpResponse<String>> future2 = httpClient.sendAsync(request2, HttpResponse.BodyHandlers.ofString());
-							future2.thenAccept(response2 ->
-							{
-								System.out.println("Response for file: " + response2.statusCode());
-								if (response2.statusCode() == 200)
-								{
-									this.configManager.setConfiguration("friendlyGuide", "etag", response2.headers().firstValue("etag").get());
-									this.configManager.setConfiguration("friendlyGuide", "data", response2.body());
-									System.out.println("Updated cache of dynamic responses");
-								}
-								else if (response2.statusCode() == 304)
-								{
-									System.out.println("Using cached data");
-								}
-								else
-								{
-									System.err.println("Error fetching dynamic responses. Status=" + response2.statusCode() + "\nUsing cache of dynamic responses");
-								}
-								Dialog.loadDynamicYaml(config.data());
-							});
-                        } catch (URISyntaxException e) {
-                            throw new RuntimeException(e);
-                        }
-					}
-					else
-					{
-						System.err.println("Error fetching dynamic responses. Status=" + response.statusCode() + "\nUsing cache of dynamic responses");
-					}
-				});
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-
+		new DialogDataLoader(this.httpClient, this.config, this.configManager).Load();
 	}
 
 	@Override

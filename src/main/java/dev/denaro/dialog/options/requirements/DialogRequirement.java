@@ -2,6 +2,8 @@ package dev.denaro.dialog.options.requirements;
 
 import dev.denaro.dialog.Dialog;
 import dev.denaro.dialog.options.conditions.DialogCondition;
+import dev.denaro.yaml.types.YamlObject;
+import dev.denaro.yaml.types.YamlSimpleValue;
 import net.runelite.api.Client;
 
 import java.io.BufferedReader;
@@ -48,25 +50,25 @@ public abstract class DialogRequirement
         }
     }
 
-    private static Map<String, Function<Map<String, Object>, DialogRequirement>> CreateCalls;
-    public static void RegisterCreateCall(String key, Function<Map<String, Object>, DialogRequirement> func)
+    private static Map<String, Function<YamlObject, DialogRequirement>> CreateCalls;
+    public static void RegisterCreateCall(String key, Function<YamlObject, DialogRequirement> func)
     {
         CreateCalls.put(key, func);
         System.out.println("Registered " + key + " Requirement");
     }
-    public static DialogRequirement New(String type, Map<String, Object> requirementMap)
+    public static DialogRequirement New(String type, YamlObject requirementMap)
     {
-        Function<Map<String, Object>, DialogRequirement> func = CreateCalls.get(type);
+        Function<YamlObject, DialogRequirement> func = CreateCalls.get(type);
         return func.apply(requirementMap);
     }
 
     private String condition;
     private boolean negate;
 
-    protected void setup(Map<String, Object> requirementMap)
+    protected void setup(YamlObject requirementMap)
     {
-        this.condition = (String)requirementMap.get("if");
-        this.negate = (Boolean)requirementMap.getOrDefault("negate", false);
+        this.condition = requirementMap.getSimpleValueOrDefault("if", YamlSimpleValue.Null).getString();
+        this.negate = requirementMap.getSimpleValueOrDefault("negate", YamlSimpleValue.fromBoolean(false)).getBoolean();
     }
 
     public abstract boolean _isMet(Client client);

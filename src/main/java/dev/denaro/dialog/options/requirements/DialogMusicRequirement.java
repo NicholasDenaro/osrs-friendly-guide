@@ -1,11 +1,11 @@
 package dev.denaro.dialog.options.requirements;
 
+import dev.denaro.yaml.types.YamlObject;
 import net.runelite.api.Client;
 import net.runelite.api.annotations.Component;
 import net.runelite.api.gameval.DBTableID;
 
 import java.lang.reflect.Field;
-import java.util.Map;
 
 @Component
 public class DialogMusicRequirement extends DialogRequirement
@@ -17,10 +17,9 @@ public class DialogMusicRequirement extends DialogRequirement
     {
         DialogRequirement.RegisterCreateCall("music", DialogMusicRequirement::create);
     }
-    public static DialogMusicRequirement create(Map<String, Object> requirementMap)
-    {
+    public static DialogMusicRequirement create(YamlObject requirementMap) {
         DialogMusicRequirement req = new DialogMusicRequirement();
-        req.track = "MUSIC_" + ((String)requirementMap.get("track")).replaceAll(" ", "_").toUpperCase();
+        req.track = "MUSIC_" + (requirementMap.getSimpleValue("track").getString()).replaceAll(" ", "_").toUpperCase();
 
         req.setup(requirementMap);
         return req;

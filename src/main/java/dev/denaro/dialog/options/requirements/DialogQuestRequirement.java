@@ -1,9 +1,8 @@
 package dev.denaro.dialog.options.requirements;
 
+import dev.denaro.yaml.types.YamlObject;
 import net.runelite.api.*;
 import net.runelite.api.annotations.Component;
-
-import java.util.Map;
 
 @Component
 public class DialogQuestRequirement extends DialogRequirement
@@ -16,12 +15,18 @@ public class DialogQuestRequirement extends DialogRequirement
     {
         DialogRequirement.RegisterCreateCall("quest", DialogQuestRequirement::create);
     }
-    public static DialogQuestRequirement create(Map<String, Object> requirementMap)
+    public static DialogQuestRequirement create(YamlObject requirementMap)
     {
         DialogQuestRequirement req = new DialogQuestRequirement();
-        req.quest =(String)requirementMap.get("name");
-        req.status = (String)requirementMap.get("status");
-        req.atleast = (String)requirementMap.get("minimum");
+        req.quest =requirementMap.getSimpleValue("name").getString();
+        if (requirementMap.hasKey("status"))
+        {
+            req.status = requirementMap.getSimpleValue("status").getString();
+        }
+        if (requirementMap.hasKey("minimum"))
+        {
+            req.atleast = requirementMap.getSimpleValue("minimum").getString();
+        }
 
         req.setup(requirementMap);
         return req;

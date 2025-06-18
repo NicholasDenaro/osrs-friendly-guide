@@ -4,49 +4,50 @@ import dev.denaro.dialog.Dialog;
 import dev.denaro.dialog.DialogMessage;
 import dev.denaro.dialog.options.conditions.DialogCondition;
 import dev.denaro.dialog.options.requirements.DialogRequirement;
+import dev.denaro.yaml.types.YamlArray;
+import dev.denaro.yaml.types.YamlObject;
+import dev.denaro.yaml.types.YamlSimpleValue;
+import dev.denaro.yaml.types.YamlValue;
 import net.runelite.api.Client;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class DialogResponse
 {
     public List<DialogRequirement> requirements;
-    private List<Object> messages;
+    private final YamlArray messages;
 
-    public DialogResponse(List<Object> messages, List<DialogRequirement> requirements) {
+    public DialogResponse(YamlArray messages, List<DialogRequirement> requirements) {
         this.messages = messages;
         this.requirements = requirements;
     }
 
-    public Dialog createDialog(Client client)
-    {
-        List<Object> messageList = new ArrayList<>(this.messages);
+    public Dialog createDialog(Client client) throws Exception {
+        List<YamlValue> messageList = this.messages.getValues();
         Dialog root = null;
         Dialog current = null;
         while (!messageList.isEmpty())
         {
             String message = null;
-            if (messageList.get(0) instanceof String)
+            if (messageList.get(0) instanceof YamlSimpleValue)
             {
-                message = (String)messageList.get(0);
+                message = ((YamlSimpleValue) messageList.get(0)).getString();
             }
             else
             {
-                Map<String, Object> obj = (Map<String, Object>)messageList.get(0);
-                if (obj.get("if") != null)
+                YamlObject obj = (YamlObject) messageList.get(0);
+                if (obj.hasKey("if"))
                 {
-                    String condition = ((String)obj.get("if")).toLowerCase();
+                    String condition = obj.getSimpleValue("if").getString().toLowerCase();
 
                     if (DialogCondition.is(condition, client))
                     {
-                        message = (String)obj.get("text");
+                        message = obj.getSimpleValue("text").getString();
                     }
                 }
                 else
                 {
-                    message = (String)obj.get("text");
+                    message = obj.getSimpleValue("text").getString();
                 }
             }
             if (message != null)

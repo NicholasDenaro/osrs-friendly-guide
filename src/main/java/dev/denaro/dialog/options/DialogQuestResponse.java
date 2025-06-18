@@ -1,6 +1,7 @@
 package dev.denaro.dialog.options;
 
 import dev.denaro.dialog.options.requirements.DialogRequirement;
+import dev.denaro.yaml.types.YamlArray;
 import net.runelite.api.Client;
 import net.runelite.api.Quest;
 import net.runelite.api.QuestState;
@@ -10,7 +11,7 @@ import java.util.List;
 public class DialogQuestResponse extends DialogResponse
 {
     public String quest;
-    public DialogQuestResponse(List<Object> messages, List<DialogRequirement> requirements, String quest) {
+    public DialogQuestResponse(YamlArray messages, List<DialogRequirement> requirements, String quest) {
         super(messages, requirements);
         this.quest = quest;
     }

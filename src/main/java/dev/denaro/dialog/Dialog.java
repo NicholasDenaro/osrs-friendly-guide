@@ -3,18 +3,21 @@ package dev.denaro.dialog;
 import dev.denaro.FriendlyGuidePlugin;
 import dev.denaro.dialog.options.*;
 import dev.denaro.dialog.options.requirements.*;
-import org.yaml.snakeyaml.Yaml;
+import dev.denaro.yaml.*;
+import dev.denaro.yaml.types.YamlArray;
+import dev.denaro.yaml.types.YamlObject;
+import dev.denaro.yaml.types.YamlValue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public abstract class Dialog
 {
@@ -122,16 +125,21 @@ public abstract class Dialog
 
     private static <T extends DialogResponse> Dialog buildOption(FriendlyGuidePlugin plugin, Stream<T> dialogs)
     {
-        return buildOption(plugin, dialogs, t -> true);
+        try
+        {
+            return buildOption(plugin, dialogs, t -> true);
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+            return new DialogOption(new DialogOption.Option[]{new DialogOption.Option("Error", new DialogMessage(DialogMessage.DialogSpeaker.Guide, "Error"))});
+        }
     }
 
-    private static <T extends DialogResponse> Dialog buildOption(FriendlyGuidePlugin plugin, Stream<T> dialogs, Predicate<T> predicate)
-    {
-        List<T> list = dialogs.peek(System.out::println).filter(predicate).filter(response ->
+    private static <T extends DialogResponse> Dialog buildOption(FriendlyGuidePlugin plugin, Stream<T> dialogs, Predicate<T> predicate) {
+        List<T> list = dialogs.filter(predicate).filter(response ->
                 response.requirements.stream().allMatch(requirement -> requirement.isMet(plugin.getClient()))
         ).collect(Collectors.toList());
-
-        System.out.println("Filtered dialogs:" + list);
 
         if (list.isEmpty())
         {
@@ -140,24 +148,49 @@ public abstract class Dialog
         }
 
         int index = (int) (Math.random() * list.size());
-        return list.get(index).createDialog(plugin.getClient());
+        try
+        {
+            return list.get(index).createDialog(plugin.getClient());
+        }
+        catch (Exception e)
+        {
+            return new DialogOption(new DialogOption.Option[]{new DialogOption.Option("Error", new DialogMessage(DialogMessage.DialogSpeaker.Guide, "Error"))});
+        }
     }
 
     public static void loadDynamicYaml(String yamlString)
     {
         System.out.println("Parsing dynamic yaml data");
         AtomicInteger counter = new AtomicInteger(0);
-        Yaml yaml = new Yaml();
-        Stream<Object> stream = StreamSupport.stream(yaml.loadAll(yamlString).spliterator(), false);
-        stream.forEach(doc -> {
-            System.out.println("Loading doc: " + doc);
-            Map<String, Object> document = (Map<String, Object>)doc;
+        try
+        {
+            Stream<YamlValue> stream = new Yaml().loadAll(yamlString).stream();
+            stream.forEach(doc -> {
+                System.out.println("Loading doc: " + doc);
 
-            loadDocument(document);
-            System.out.println("doc loaded");
-            counter.incrementAndGet();
-        });
-        System.out.println("loaded " + counter.get() + " docs");
+                if (doc instanceof YamlObject)
+                {
+                    try {
+                        loadDocument((YamlObject)doc);
+                    } catch (Exception e) {
+                        System.out.println("Doc not loaded. error");
+                        System.err.println("Doc not loaded. error");
+                        e.printStackTrace();
+                    }
+                    System.out.println("doc loaded");
+                    counter.incrementAndGet();
+                }
+                else
+                {
+                    System.out.println("doc NOT loaded, incorrect type");
+                }
+            });
+            System.out.println("loaded " + counter.get() + " docs");
+        }
+        catch (IOException | ParseException ioException)
+        {
+            ioException.printStackTrace();
+        }
     }
 
     static {
@@ -188,8 +221,7 @@ public abstract class Dialog
                 if (dialogFileStream != null)
                 {
                     System.out.println("Loading file: " + file);
-                    Yaml yaml = new Yaml();
-                    Map<String, Object> document = yaml.load(dialogFileStream);
+                    YamlObject document = (YamlObject) new Yaml().load(dialogFileStream);
 
                     loadDocument(document);
                 }
@@ -210,21 +242,26 @@ public abstract class Dialog
 
     }
 
-    private static void loadDocument(Map<String, Object> document)
-    {
-        String type = (String)document.get("type");
+    private static void loadDocument(YamlObject document) throws Exception {
+        String type = document.getSimpleValue("type").getString();
 
-        List<Map<String, Object>> requirements = (List<Map<String, Object>>)document.getOrDefault("requirements", new ArrayList<>());
-        List<Object> messages = (List<Object>)document.get("messages");
+        YamlArray requirements = document.getArrayOrDefault("requirements", new YamlArray());
+        YamlArray messages = document.getArray("messages");
 
         List<DialogRequirement> requirementList = new ArrayList<>();
-        for (Map<String, Object> requirementMap : requirements)
+        for (YamlValue requirementVal : requirements)
         {
-            String requirementType = ((String)requirementMap.get("type")).toLowerCase();
-            DialogRequirement req = DialogRequirement.New(requirementType, requirementMap);
-            if (req != null) {
-                requirementList.add(req);
+            if (requirementVal instanceof YamlObject)
+            {
+                YamlObject requirementMap = (YamlObject) requirementVal;
+
+                String requirementType = requirementMap.getSimpleValue("type").getString().toLowerCase();
+                DialogRequirement req = DialogRequirement.New(requirementType, requirementMap);
+                if (req != null) {
+                    requirementList.add(req);
+                }
             }
+
         }
 
         switch (type.toLowerCase())
@@ -233,21 +270,21 @@ public abstract class Dialog
                 Dialog.dialogResponses.get(DialogType.Combat).add(new DialogCombatResponse(messages, requirementList));
                 break;
             case "item":
-                String itemType = (String)document.get("itemType");
+                String itemType = document.getSimpleValue("itemType").getString();
                 Dialog.dialogResponses.get(DialogType.Item).add(new DialogItemResponse(messages, requirementList, itemType));
                 break;
             case "money":
                 Dialog.dialogResponses.get(DialogType.Money).add(new DialogMoneyResponse(messages, requirementList));
                 break;
             case "quest":
-                String quest = (String)document.get("quest");
+                String quest = document.getSimpleValue("quest").getString();
                 Dialog.dialogResponses.get(DialogType.Quest).add(new DialogQuestResponse(messages, requirementList, quest));
                 break;
             case "explore":
                 Dialog.dialogResponses.get(DialogType.Explore).add(new DialogExploreResponse(messages, requirementList));
                 break;
             case "skill":
-                String skillGroup = (String)document.get("skillGroup");
+                String skillGroup = document.getSimpleValue("skillGroup").getString();
                 Dialog.dialogResponses.get(DialogType.Skill).add(new DialogSkillResponse(messages, requirementList, skillGroup));
                 break;
         }
