@@ -4,52 +4,62 @@ import dev.denaro.dialog.Dialog;
 import dev.denaro.dialog.DialogMessage;
 import dev.denaro.dialog.options.conditions.DialogCondition;
 import dev.denaro.dialog.options.requirements.DialogRequirement;
-import dev.denaro.yaml.types.YamlArray;
-import dev.denaro.yaml.types.YamlObject;
-import dev.denaro.yaml.types.YamlSimpleValue;
-import dev.denaro.yaml.types.YamlValue;
 import net.runelite.api.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.tomlj.TomlArray;
+import org.tomlj.TomlInvalidTypeException;
+import org.tomlj.TomlTable;
 
 import java.util.List;
 
 public class DialogResponse
 {
+    private static final Logger logger = LoggerFactory.getLogger(DialogResponse.class);
     public List<DialogRequirement> requirements;
-    private final YamlArray messages;
+    private final TomlArray messages;
 
-    public DialogResponse(YamlArray messages, List<DialogRequirement> requirements) {
+    public DialogResponse(TomlArray messages, List<DialogRequirement> requirements) {
         this.messages = messages;
         this.requirements = requirements;
     }
 
     public Dialog createDialog(Client client) throws Exception {
-        List<YamlValue> messageList = this.messages.getValues();
         Dialog root = null;
         Dialog current = null;
-        while (!messageList.isEmpty())
+        for (int i = 0; i < this.messages.size(); i++)
         {
             String message = null;
-            if (messageList.get(0) instanceof YamlSimpleValue)
+            try
             {
-                message = ((YamlSimpleValue) messageList.get(0)).getString();
+                message = this.messages.getString(i);
             }
-            else
+            catch (TomlInvalidTypeException exceptionStr)
             {
-                YamlObject obj = (YamlObject) messageList.get(0);
-                if (obj.hasKey("if"))
+                // not a string, so check table
+                try
                 {
-                    String condition = obj.getSimpleValue("if").getString().toLowerCase();
-
-                    if (DialogCondition.is(condition, client))
+                    TomlTable obj = this.messages.getTable(i);
+                    if (obj.contains("if"))
                     {
-                        message = obj.getSimpleValue("text").getString();
+                        String condition = obj.getString("if").toLowerCase();
+
+                        if (DialogCondition.is(condition, client))
+                        {
+                            message = obj.getString("text");
+                        }
+                    }
+                    else
+                    {
+                        message = obj.getString("text");
                     }
                 }
-                else
+                catch (TomlInvalidTypeException exceptionObj)
                 {
-                    message = obj.getSimpleValue("text").getString();
+                    logger.error("messages has incorrect format");
                 }
             }
+
             if (message != null)
             {
                 if (root == null) {
@@ -61,8 +71,6 @@ public class DialogResponse
                     current = current.setNext(new DialogMessage(DialogMessage.DialogSpeaker.Guide, message));
                 }
             }
-
-            messageList.remove(0);
         }
 
         return root;

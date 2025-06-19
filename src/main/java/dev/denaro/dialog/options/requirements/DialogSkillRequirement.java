@@ -1,12 +1,12 @@
 package dev.denaro.dialog.options.requirements;
 
-import dev.denaro.yaml.types.YamlObject;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
 import net.runelite.api.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tomlj.TomlTable;
 
 @Component
 public class DialogSkillRequirement extends DialogRequirement
@@ -20,22 +20,22 @@ public class DialogSkillRequirement extends DialogRequirement
     {
         DialogRequirement.RegisterCreateCall("skill", DialogSkillRequirement::create);
     }
-    public static DialogSkillRequirement create(YamlObject requirementMap)
+    public static DialogSkillRequirement create(TomlTable requirement)
     {
         DialogSkillRequirement req = new DialogSkillRequirement();
 
-        req.skill = requirementMap.getSimpleValue("name").getString();
-        req.levelMin = requirementMap.getSimpleValue("level").getInt();
-        if (requirementMap.hasKey("levelMax"))
+        req.skill = requirement.getString("name");
+        req.levelMin = Math.toIntExact(requirement.getLong("level"));
+        if (requirement.contains("levelMax"))
         {
-            req.levelMax = requirementMap.getSimpleValue("levelMax").getInt();
+            req.levelMax = Math.toIntExact(requirement.getLong("levelMax"));
         }
         else
         {
             req.levelMax = 999;
         }
 
-        req.setup(requirementMap);
+        req.setup(requirement);
 
         return req;
     }

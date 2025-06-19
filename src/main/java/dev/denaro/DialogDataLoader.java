@@ -32,7 +32,7 @@ public class DialogDataLoader
         Thread th = new Thread(() -> {
             try {
                 logger.debug("Loading Dialog data...");
-                URI uri = new URI("https://github.com/NicholasDenaro/osrs-friendly-guide-responses/releases/download/Latest/merged.yml");
+                URI uri = new URI("https://github.com/NicholasDenaro/osrs-friendly-guide-responses/releases/download/Latest/merged.toml");
                 HttpRequest request = HttpRequest.newBuilder().GET().uri(uri).header("IF-NONE-MATCH", this.config.etag()).build();
                 future.set(httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString()));
                 future.get().thenAccept(response ->
@@ -65,7 +65,7 @@ public class DialogDataLoader
                                     logger.error("Error fetching dynamic responses. Status=" + response2.statusCode() + "\nUsing cache of dynamic responses");
                                 }
 
-                                Dialog.loadDynamicYaml(config.data());
+                                Dialog.loadDynamicToml(config.data());
                             });
                         } catch (URISyntaxException e) {
                             logger.error(e.getMessage());

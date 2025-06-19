@@ -1,12 +1,11 @@
 package dev.denaro.dialog.options.requirements;
 
-import dev.denaro.dialog.options.conditions.DialogCondition;
-import dev.denaro.yaml.types.YamlObject;
 import net.runelite.api.Client;
 import net.runelite.api.annotations.Component;
 import net.runelite.api.gameval.DBTableID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tomlj.TomlTable;
 
 import java.lang.reflect.Field;
 
@@ -21,11 +20,11 @@ public class DialogMusicRequirement extends DialogRequirement
     {
         DialogRequirement.RegisterCreateCall("music", DialogMusicRequirement::create);
     }
-    public static DialogMusicRequirement create(YamlObject requirementMap) {
+    public static DialogMusicRequirement create(TomlTable requirement) {
         DialogMusicRequirement req = new DialogMusicRequirement();
-        req.track = "MUSIC_" + (requirementMap.getSimpleValue("track").getString()).replaceAll(" ", "_").toUpperCase();
+        req.track = "MUSIC_" + (requirement.getString("track").replaceAll(" ", "_").toUpperCase());
 
-        req.setup(requirementMap);
+        req.setup(requirement);
         return req;
     }
 

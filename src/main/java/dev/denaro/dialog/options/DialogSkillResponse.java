@@ -1,14 +1,14 @@
 package dev.denaro.dialog.options;
 
 import dev.denaro.dialog.options.requirements.DialogRequirement;
-import dev.denaro.yaml.types.YamlArray;
+import org.tomlj.TomlArray;
 
 import java.util.List;
 
 public class DialogSkillResponse extends DialogResponse
 {
     public String skillGroup;
-    public DialogSkillResponse(YamlArray messages, List<DialogRequirement> requirements, String skillGroup) {
+    public DialogSkillResponse(TomlArray messages, List<DialogRequirement> requirements, String skillGroup) {
         super(messages, requirements);
         this.skillGroup = skillGroup;
     }
