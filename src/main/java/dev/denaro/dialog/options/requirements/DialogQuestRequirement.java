@@ -1,8 +1,8 @@
 package dev.denaro.dialog.options.requirements;
 
-import dev.denaro.yaml.types.YamlObject;
 import net.runelite.api.*;
 import net.runelite.api.annotations.Component;
+import org.tomlj.TomlTable;
 
 @Component
 public class DialogQuestRequirement extends DialogRequirement
@@ -15,20 +15,14 @@ public class DialogQuestRequirement extends DialogRequirement
     {
         DialogRequirement.RegisterCreateCall("quest", DialogQuestRequirement::create);
     }
-    public static DialogQuestRequirement create(YamlObject requirementMap)
+    public static DialogQuestRequirement create(TomlTable requirement)
     {
         DialogQuestRequirement req = new DialogQuestRequirement();
-        req.quest =requirementMap.getSimpleValue("name").getString();
-        if (requirementMap.hasKey("status"))
-        {
-            req.status = requirementMap.getSimpleValue("status").getString();
-        }
-        if (requirementMap.hasKey("minimum"))
-        {
-            req.atleast = requirementMap.getSimpleValue("minimum").getString();
-        }
+        req.quest = requirement.getString("name");
+        req.status = requirement.getString("status");
+        req.atleast = requirement.getString("minimum");
 
-        req.setup(requirementMap);
+        req.setup(requirement);
         return req;
     }
 

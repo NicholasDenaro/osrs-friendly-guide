@@ -1,5 +1,7 @@
 package dev.denaro;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import dev.denaro.dialog.Dialog;
 import dev.denaro.dialog.DialogMessage;
 import dev.denaro.dialog.DialogOption;
@@ -9,6 +11,7 @@ import net.runelite.api.Skill;
 import net.runelite.api.WorldType;
 import net.runelite.client.config.ConfigManager;
 import org.mockito.Mockito;
+import org.slf4j.LoggerFactory;
 
 import java.net.http.HttpClient;
 import java.util.ArrayList;
@@ -22,7 +25,11 @@ import static org.mockito.Mockito.*;
 
 public class DialogTest
 {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException
+    {
+        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        logger.setLevel(Level.ALL);
+
         FriendlyGuideConfig config = mock(FriendlyGuideConfig.class);
 
         Mockito.when(config.etag()).thenReturn("a");

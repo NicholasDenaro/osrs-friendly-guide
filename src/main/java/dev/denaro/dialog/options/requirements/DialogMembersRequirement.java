@@ -1,9 +1,9 @@
 package dev.denaro.dialog.options.requirements;
 
-import dev.denaro.yaml.types.YamlObject;
 import net.runelite.api.Client;
 import net.runelite.api.WorldType;
 import net.runelite.api.annotations.Component;
+import org.tomlj.TomlTable;
 
 @Component
 public class DialogMembersRequirement extends DialogRequirement
@@ -12,7 +12,7 @@ public class DialogMembersRequirement extends DialogRequirement
     {
         DialogRequirement.RegisterCreateCall("members", DialogMembersRequirement::create);
     }
-    public static DialogMembersRequirement create(YamlObject requirementMap)
+    public static DialogMembersRequirement create(TomlTable requirement)
     {
         return new DialogMembersRequirement();
     }

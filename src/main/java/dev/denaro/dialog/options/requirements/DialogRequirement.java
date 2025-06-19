@@ -2,11 +2,10 @@ package dev.denaro.dialog.options.requirements;
 
 import dev.denaro.dialog.Dialog;
 import dev.denaro.dialog.options.conditions.DialogCondition;
-import dev.denaro.yaml.types.YamlObject;
-import dev.denaro.yaml.types.YamlSimpleValue;
 import net.runelite.api.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tomlj.TomlTable;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -53,25 +52,26 @@ public abstract class DialogRequirement
         }
     }
 
-    private static Map<String, Function<YamlObject, DialogRequirement>> CreateCalls;
-    public static void RegisterCreateCall(String key, Function<YamlObject, DialogRequirement> func)
+    private static Map<String, Function<TomlTable, DialogRequirement>> CreateCalls;
+    public static void RegisterCreateCall(String key, Function<TomlTable, DialogRequirement> func)
     {
         CreateCalls.put(key, func);
         logger.debug("Registered " + key + " Requirement");
     }
-    public static DialogRequirement New(String type, YamlObject requirementMap)
+
+    public static DialogRequirement New(String type, TomlTable requirement)
     {
-        Function<YamlObject, DialogRequirement> func = CreateCalls.get(type);
-        return func.apply(requirementMap);
+        Function<TomlTable, DialogRequirement> func = CreateCalls.get(type);
+        return func.apply(requirement);
     }
 
     private String condition;
     private boolean negate;
 
-    protected void setup(YamlObject requirementMap)
+    protected void setup(TomlTable requirement)
     {
-        this.condition = requirementMap.getSimpleValueOrDefault("if", YamlSimpleValue.Null).getString();
-        this.negate = requirementMap.getSimpleValueOrDefault("negate", YamlSimpleValue.fromBoolean(false)).getBoolean();
+        this.condition = requirement.getString("if");
+        this.negate = Boolean.TRUE.equals(requirement.getBoolean("negate"));
     }
 
     public abstract boolean _isMet(Client client);
