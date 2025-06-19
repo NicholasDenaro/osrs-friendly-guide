@@ -7,6 +7,8 @@ import dev.denaro.yaml.*;
 import dev.denaro.yaml.types.YamlArray;
 import dev.denaro.yaml.types.YamlObject;
 import dev.denaro.yaml.types.YamlValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,6 +23,8 @@ import java.util.stream.Stream;
 
 public abstract class Dialog
 {
+    private static final Logger logger = LoggerFactory.getLogger(Dialog.class);
+
     public static Map<DialogType, List<DialogResponse>> dialogResponses = new HashMap();
 
     protected Dialog()
@@ -131,7 +135,7 @@ public abstract class Dialog
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error(ex.getMessage());
             return new DialogOption(new DialogOption.Option[]{new DialogOption.Option("Error", new DialogMessage(DialogMessage.DialogSpeaker.Guide, "Error"))});
         }
     }
@@ -143,7 +147,7 @@ public abstract class Dialog
 
         if (list.isEmpty())
         {
-            System.out.println("No dialogs found");
+            logger.debug("No dialogs found");
             return new DialogMessage(DialogMessage.DialogSpeaker.Guide, "I don't have anything for you about this right now.");
         }
 
@@ -160,41 +164,39 @@ public abstract class Dialog
 
     public static void loadDynamicYaml(String yamlString)
     {
-        System.out.println("Parsing dynamic yaml data");
+        logger.debug("Parsing dynamic yaml data");
         AtomicInteger counter = new AtomicInteger(0);
         try
         {
             Stream<YamlValue> stream = new Yaml().loadAll(yamlString).stream();
             stream.forEach(doc -> {
-                System.out.println("Loading doc: " + doc);
+                logger.debug("Loading doc: " + doc);
 
                 if (doc instanceof YamlObject)
                 {
                     try {
                         loadDocument((YamlObject)doc);
                     } catch (Exception e) {
-                        System.out.println("Doc not loaded. error");
-                        System.err.println("Doc not loaded. error");
-                        e.printStackTrace();
+                        logger.error("Doc not loaded. error", e);
                     }
-                    System.out.println("doc loaded");
+                    logger.debug("doc loaded");
                     counter.incrementAndGet();
                 }
                 else
                 {
-                    System.out.println("doc NOT loaded, incorrect type");
+                    logger.debug("doc NOT loaded, incorrect type");
                 }
             });
-            System.out.println("loaded " + counter.get() + " docs");
+            logger.debug("loaded " + counter.get() + " docs");
         }
         catch (IOException | ParseException ioException)
         {
-            ioException.printStackTrace();
+            logger.error(ioException.getMessage());
         }
     }
 
     static {
-        System.out.println("loading yml files");
+        logger.debug("loading yml files");
         Dialog.dialogResponses.put(DialogType.Combat, new ArrayList<>());
         Dialog.dialogResponses.put(DialogType.Item, new ArrayList<>());
         Dialog.dialogResponses.put(DialogType.Money, new ArrayList<>());
@@ -213,31 +215,29 @@ public abstract class Dialog
 
             reader.close();
 
-            System.out.println(files);
+            logger.debug(String.valueOf(files));
 
             for (String file : files)
             {
                 InputStream dialogFileStream = Dialog.class.getResourceAsStream(file);
                 if (dialogFileStream != null)
                 {
-                    System.out.println("Loading file: " + file);
+                    logger.debug("Loading file: " + file);
                     YamlObject document = (YamlObject) new Yaml().load(dialogFileStream);
 
                     loadDocument(document);
                 }
             }
 
-            System.out.println("Finished loading dialogs");
+            logger.debug("Finished loading dialogs");
         }
         catch (IOException exception)
         {
-            System.out.println("Failed to load files:");
-            exception.printStackTrace();
+            logger.error("Failed to load files:" + exception.getMessage());
         }
         catch (Exception exception)
         {
-            System.out.println("Other Exception:");
-            exception.printStackTrace();
+            logger.error("Other Exception:", exception);
         }
 
     }

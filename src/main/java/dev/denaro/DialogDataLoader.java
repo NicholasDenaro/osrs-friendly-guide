@@ -2,6 +2,8 @@ package dev.denaro;
 
 import dev.denaro.dialog.Dialog;
 import net.runelite.client.config.ConfigManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class DialogDataLoader
 {
+    private static final Logger logger = LoggerFactory.getLogger(DialogDataLoader.class);
     private HttpClient httpClient;
     private FriendlyGuideConfig config;
     private ConfigManager configManager;
@@ -28,53 +31,53 @@ public class DialogDataLoader
         AtomicReference<CompletableFuture<HttpResponse<String>>> future2 = new AtomicReference<>();
         Thread th = new Thread(() -> {
             try {
-                System.out.println("Loading Dialog data...");
+                logger.debug("Loading Dialog data...");
                 URI uri = new URI("https://github.com/NicholasDenaro/osrs-friendly-guide-responses/releases/download/Latest/merged.yml");
                 HttpRequest request = HttpRequest.newBuilder().GET().uri(uri).header("IF-NONE-MATCH", this.config.etag()).build();
                 future.set(httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString()));
                 future.get().thenAccept(response ->
                 {
-                    System.out.println("Data received");
+                    logger.debug("Data received");
                     if (response.statusCode() == 302)
                     {
-                        System.out.println("Redirect");
+                        logger.debug("Redirect");
                         try
                         {
                             URI redirect = new URI(response.headers().firstValue("Location").get());
-                            System.out.println("Fetching contents from " + redirect.toString().split("\\?")[0]);
+                            logger.debug("Fetching contents from " + redirect.toString().split("\\?")[0]);
                             HttpRequest request2 = HttpRequest.newBuilder().GET().uri(redirect).header("IF-NONE-MATCH", this.config.etag()).build();
                             future2.set(httpClient.sendAsync(request2, HttpResponse.BodyHandlers.ofString()));
                             future2.get().thenAccept(response2 ->
                             {
-                                System.out.println("Response for file: " + response2.statusCode());
+                                logger.debug("Response for file: " + response2.statusCode());
                                 if (response2.statusCode() == 200)
                                 {
                                     this.configManager.setConfiguration("friendlyGuide", "etag", response2.headers().firstValue("etag").get());
                                     this.configManager.setConfiguration("friendlyGuide", "data", response2.body());
-                                    System.out.println("Updated cache of dynamic responses");
+                                    logger.debug("Updated cache of dynamic responses");
                                 }
                                 else if (response2.statusCode() == 304)
                                 {
-                                    System.out.println("Using cached data");
+                                    logger.debug("Using cached data");
                                 }
                                 else
                                 {
-                                    System.err.println("Error fetching dynamic responses. Status=" + response2.statusCode() + "\nUsing cache of dynamic responses");
+                                    logger.error("Error fetching dynamic responses. Status=" + response2.statusCode() + "\nUsing cache of dynamic responses");
                                 }
 
                                 Dialog.loadDynamicYaml(config.data());
                             });
                         } catch (URISyntaxException e) {
-                            e.printStackTrace();
+                            logger.error(e.getMessage());
                         }
                     }
                     else
                     {
-                        System.err.println("Error fetching dynamic responses. Status=" + response.statusCode() + "\nUsing cache of dynamic responses");
+                        logger.error("Error fetching dynamic responses. Status=" + response.statusCode() + "\nUsing cache of dynamic responses");
                     }
                 });
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error(e.getMessage());
             }
         });
         th.start();

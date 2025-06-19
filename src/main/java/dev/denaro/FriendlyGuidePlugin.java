@@ -20,6 +20,8 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.net.http.HttpClient;
@@ -31,6 +33,8 @@ import java.util.Arrays;
 )
 public class FriendlyGuidePlugin extends Plugin
 {
+	private static final Logger logger = LoggerFactory.getLogger(FriendlyGuidePlugin.class);
+
 	@Getter
 	@Inject
 	private Client client;
@@ -129,7 +133,7 @@ public class FriendlyGuidePlugin extends Plugin
 	{
 		if (developerMode)
 		{
-			System.out.println(command.getCommand());
+			logger.debug(command.getCommand());
 			String cmd = command.getCommand();
 			if (cmd.equals("guide"))
 			{

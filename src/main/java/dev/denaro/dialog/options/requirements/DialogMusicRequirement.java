@@ -1,15 +1,19 @@
 package dev.denaro.dialog.options.requirements;
 
+import dev.denaro.dialog.options.conditions.DialogCondition;
 import dev.denaro.yaml.types.YamlObject;
 import net.runelite.api.Client;
 import net.runelite.api.annotations.Component;
 import net.runelite.api.gameval.DBTableID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 
 @Component
 public class DialogMusicRequirement extends DialogRequirement
 {
+    private static final Logger logger = LoggerFactory.getLogger(DialogMusicRequirement.class);
     String track;
     private Boolean isMet = null;
 
@@ -43,10 +47,10 @@ public class DialogMusicRequirement extends DialogRequirement
             this.isMet = unlocked;
 
             return unlocked;
-        } catch (Exception ignored)
+        }
+        catch (Exception exception)
         {
-            System.out.println(("failed to check music requirement"));
-            ignored.printStackTrace();
+            logger.error(("failed to check music requirement"), exception);
         }
         return false;
     }

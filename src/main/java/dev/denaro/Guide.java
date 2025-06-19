@@ -4,12 +4,16 @@ import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Guide
 {
+    private static final Logger logger = LoggerFactory.getLogger(Guide.class);
+
     private static final GuidePosition GEGuide = new GuidePosition(new WorldPoint(3157, 3490, 0), 0);
     private static final GuidePosition LumbridgeGuide = new GuidePosition(new WorldPoint(3217, 3223, 0), 1536);
 
@@ -61,7 +65,7 @@ public class Guide
 
         if (model == null)
         {
-            System.out.println("Using model ids: " + this.plugin.getConfig().modelIds());
+            logger.debug("Using model ids: " + this.plugin.getConfig().modelIds());
 
             int[] ids = Arrays.stream(this.plugin.getConfig().modelIds().split(", ")).mapToInt(Integer::parseInt).toArray();
 
@@ -156,7 +160,7 @@ public class Guide
             this.object.setOrientation(position.orientation);
             this.object.setActive(true);
             this.shown = true;
-            System.out.println(this.object.getLocation());
+            logger.debug(String.valueOf(this.object.getLocation()));
         };
 
         if (this.plugin.getClient().isClientThread())

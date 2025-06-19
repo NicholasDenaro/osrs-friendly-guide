@@ -2,6 +2,8 @@ package dev.denaro.dialog.options.conditions;
 
 import dev.denaro.dialog.Dialog;
 import net.runelite.api.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -12,10 +14,11 @@ import java.util.Map;
 
 public abstract class DialogCondition
 {
+    private static final Logger logger = LoggerFactory.getLogger(DialogCondition.class);
     static
     {
         map = new HashMap<>();
-        System.out.println("Loading dialog conditions");
+        logger.debug("Loading dialog conditions");
 
         InputStream conditionsFolder = Dialog.class.getResourceAsStream("/dev/denaro/dialog/options/conditions");
         BufferedReader reader = new BufferedReader(new InputStreamReader(conditionsFolder));
@@ -29,13 +32,13 @@ public abstract class DialogCondition
 
             reader.close();
 
-            System.out.println(files);
+            logger.debug(String.valueOf(files));
 
             for (String file : files)
             {
                 String className = file.replaceAll("/", ".").replaceAll(".class", "").substring(1);
 
-                System.out.println("Attempting to load file: " + file + " as: " + className);
+                logger.debug("Attempting to load file: " + file + " as: " + className);
                 Class.forName(className);
             }
 
@@ -49,7 +52,7 @@ public abstract class DialogCondition
     public static void register(String key, DialogCondition condition)
     {
         map.put(key, condition);
-        System.out.println("Registered "+ key + " " + condition);
+        logger.debug("Registered "+ key + " " + condition);
     }
 
     public static boolean is(String condition, Client client)

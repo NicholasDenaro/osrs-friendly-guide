@@ -1,5 +1,6 @@
 package dev.denaro.yaml;
 
+import dev.denaro.dialog.options.requirements.DialogSkillRequirement;
 import dev.denaro.yaml.parser.TokenReader;
 import dev.denaro.yaml.parser.YamlLine;
 import dev.denaro.yaml.parser.YamlToken;
@@ -8,6 +9,8 @@ import dev.denaro.yaml.types.YamlArray;
 import dev.denaro.yaml.types.YamlObject;
 import dev.denaro.yaml.types.YamlSimpleValue;
 import dev.denaro.yaml.types.YamlValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -17,7 +20,7 @@ import java.util.stream.Collectors;
 
 public class Yaml
 {
-    ;
+    private static final Logger logger = LoggerFactory.getLogger(Yaml.class);
 
     private BufferedReader reader;
     public Yaml()
@@ -42,7 +45,7 @@ public class Yaml
         int val = reader.read();
         char next = (char) val;
         boolean consumedNext = false;
-//        System.out.println("Start tokenization.");
+        logger.debug("Start tokenization.");
         while (next != (char) 0)
         {
             char ch = next;
@@ -56,7 +59,6 @@ public class Yaml
                 next = val == -1 ? (char) 0 : (char) val;
             }
 
-//            System.out.print(ch);
             if (consumedNext)
             {
                 consumedNext = false;
@@ -222,9 +224,9 @@ public class Yaml
             tokens.get(i - 1).setNext(tokens.get(i));
         }
 
-//        System.out.println("end tokenization.");
-//        System.out.println("Tokens:");
-//        System.out.println(tokens);
+        logger.debug("end tokenization.");
+        logger.debug("Tokens:");
+        logger.debug(String.valueOf(tokens));
 
         return tokens;
     }
@@ -313,7 +315,7 @@ public class Yaml
     }
 
     private YamlObject parseObject(TokenReader reader, YamlObject object, int depth) throws ParseException {
-//        System.out.println("Reading object");
+        logger.debug("Reading object");
 
         while (true)
         {
@@ -340,7 +342,7 @@ public class Yaml
                     throw new ParseException("Must be a string", -1);
                 }
 
-//                System.out.println("key: " + key);
+                logger.debug("key: " + key);
 
                 YamlToken splitter = key.next();
 
@@ -349,11 +351,11 @@ public class Yaml
                     throw new ParseException("Must be a ':', instead found " + (splitter == null ? "null" : splitter.type), -1);
                 }
 
-//                System.out.println("splitter: " + splitter);
+                logger.debug("splitter: " + splitter);
 
                 YamlToken value = splitter.next();
 
-//                System.out.println("value: " + value);
+                logger.debug("value: " + value);
 
                 if (value == null)
                 {
@@ -422,7 +424,7 @@ public class Yaml
     }
 
     private YamlArray parseArray(TokenReader reader, YamlArray array, int depth) throws ParseException {
-//        System.out.println("Reading array");
+        logger.debug("Reading array");
 
         while (true) {
             int startLine = reader.getIndex();
@@ -444,7 +446,7 @@ public class Yaml
                 }
                 else
                 {
-//                    System.out.println("new index");
+                    logger.debug("new index");
                     YamlToken value = arrayIndex.next();
                     if (value.type == YamlTokenType.new_line || value.type == YamlTokenType.comment)
                     {
@@ -511,7 +513,7 @@ public class Yaml
                             // dupe code
                             if (objectValue == null)
                             {
-//                                System.out.println("null array value");
+                                logger.debug("null array value");
                                 object.set(value.value, null);
                                 return array;
                             }
@@ -528,12 +530,12 @@ public class Yaml
 
                                 if (d2 < objectDepth)
                                 {
-//                                    System.out.println("null array value");
+                                    logger.debug("null array value");
                                     object.set(value.value, null);
                                 }
                                 else if (d2 == objectDepth)
                                 {
-//                                    System.out.println("null array value");
+                                    logger.debug("null array value");
                                     object.set(value.value, null);
                                 }
                                 else // d2 > objectDepth
@@ -559,7 +561,7 @@ public class Yaml
                             }
                             else if (value.type == YamlTokenType.string)
                             {
-//                                System.out.println("set object value to string");
+                                logger.debug("set object value to string");
                                 object.set(value.value, parseSimpleValue(reader, new YamlSimpleValue(objectValue.value.trim()), objectDepth + 1));
                             }
                             // end dupe code

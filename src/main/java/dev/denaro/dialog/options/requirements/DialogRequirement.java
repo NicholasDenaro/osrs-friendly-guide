@@ -5,6 +5,8 @@ import dev.denaro.dialog.options.conditions.DialogCondition;
 import dev.denaro.yaml.types.YamlObject;
 import dev.denaro.yaml.types.YamlSimpleValue;
 import net.runelite.api.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -16,10 +18,11 @@ import java.util.function.Function;
 
 public abstract class DialogRequirement
 {
+    private static final Logger logger = LoggerFactory.getLogger(DialogRequirement.class);
     static
     {
         CreateCalls = new HashMap<>();
-        System.out.println("Loading dialog requirements");
+        logger.debug("Loading dialog requirements");
 
         InputStream requirementsFolder = Dialog.class.getResourceAsStream("/dev/denaro/dialog/options/requirements");
         BufferedReader reader = new BufferedReader(new InputStreamReader(requirementsFolder));
@@ -33,13 +36,13 @@ public abstract class DialogRequirement
 
             reader.close();
 
-            System.out.println(files);
+            logger.debug(String.valueOf(files));
 
             for (String file : files)
             {
                 String className = file.replaceAll("/", ".").replaceAll(".class", "").substring(1);
 
-                System.out.println("Attempting to load file: " + file + " as: " + className);
+                logger.debug("Attempting to load file: " + file + " as: " + className);
                 Class.forName(className);
             }
 
@@ -54,7 +57,7 @@ public abstract class DialogRequirement
     public static void RegisterCreateCall(String key, Function<YamlObject, DialogRequirement> func)
     {
         CreateCalls.put(key, func);
-        System.out.println("Registered " + key + " Requirement");
+        logger.debug("Registered " + key + " Requirement");
     }
     public static DialogRequirement New(String type, YamlObject requirementMap)
     {
