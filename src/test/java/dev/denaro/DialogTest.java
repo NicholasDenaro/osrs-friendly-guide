@@ -1,7 +1,6 @@
 package dev.denaro;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import dev.denaro.dialog.Dialog;
 import dev.denaro.dialog.DialogMessage;
 import dev.denaro.dialog.DialogOption;
@@ -11,6 +10,7 @@ import net.runelite.api.Skill;
 import net.runelite.api.WorldType;
 import net.runelite.client.config.ConfigManager;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.http.HttpClient;
@@ -25,6 +25,8 @@ import static org.mockito.Mockito.*;
 
 public class DialogTest
 {
+    private static final Logger logger = LoggerFactory.getLogger(DialogTest.class);
+
     public static void main(String[] args) throws InterruptedException
     {
         ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -49,9 +51,9 @@ public class DialogTest
             return null;
         }).when(configManager).setConfiguration(Mockito.eq("friendlyGuide"), Mockito.eq("data"), Mockito.anyString());
 
-        System.out.println("Loading data");
+        logger.info("Loading data");
         new DialogDataLoader(HttpClient.newHttpClient(), config, configManager).Load();
-        System.out.println("Finished loading data");
+        logger.info("Finished loading data");
 
         Client clientMock = mock(Client.class);
         Mockito.when(clientMock.getWorldType()).thenReturn(EnumSet.of(WorldType.MEMBERS));
@@ -81,14 +83,14 @@ public class DialogTest
         {
             for (int i = 0; i < ((DialogOption) treeOptions).options.length; i++)
             {
-                System.out.println("Running tree with dialog option: " + i + " " + ((DialogOption) treeOptions).options[i].text + "\n");
+                logger.info("Running tree with dialog option: " + i + " " + ((DialogOption) treeOptions).options[i].text + "\n");
                 Dialog dialog = treeOptions;
 
                 if (subOptions.isEmpty() && ((DialogOption) treeOptions).options[i].next() instanceof DialogOption)
                 {
                     int optionCount = ((DialogOption)((DialogOption) treeOptions).options[i].next()).options.length;
                     subOptions = new ArrayList<Integer>(IntStream.range(0, optionCount).boxed().collect(Collectors.toList()));
-                    System.out.println("Found sub-options: " + subOptions);
+                    logger.info("Found sub-options: " + subOptions);
                 }
 
                 while (dialog != null)
@@ -96,14 +98,14 @@ public class DialogTest
                     if (dialog instanceof DialogMessage)
                     {
                         DialogMessage dm = (DialogMessage) dialog;
-                        System.out.println(dm.speaker + ":" + dm.message);
+                        logger.info(dm.speaker + ":" + dm.message);
 
                         dialog = dialog.next();
                     }
                     else if (dialog instanceof DialogOption)
                     {
                         DialogOption options = (DialogOption) dialog;
-                        System.out.println("Options:\n- " + Arrays.stream(options.options).map(opt -> opt.text).collect(Collectors.joining("\n- ")));
+                        logger.info("Options:\n- " + Arrays.stream(options.options).map(opt -> opt.text).collect(Collectors.joining("\n- ")));
 
                         int index = i;
                         if (dialog != treeOptions && !subOptions.isEmpty())
@@ -115,7 +117,7 @@ public class DialogTest
                     }
                     else
                     {
-                        System.out.println("Unknown dialog type");
+                        logger.info("Unknown dialog type");
                     }
                 }
 
