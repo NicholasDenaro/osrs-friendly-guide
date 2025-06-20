@@ -45,7 +45,7 @@ public abstract class DialogCondition
         }
         catch(Exception ex)
         {
-            ex.printStackTrace();
+            logger.error(String.valueOf(ex));
         }
     }
     private static Map<String, DialogCondition> map;

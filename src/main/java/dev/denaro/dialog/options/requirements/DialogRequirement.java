@@ -46,9 +46,9 @@ public abstract class DialogRequirement
             }
 
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error(String.valueOf(ex));
         }
     }
 

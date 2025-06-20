@@ -3,12 +3,15 @@ package dev.denaro;
 import net.runelite.api.Point;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.util.ImageUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class FriendlyGuideOverlay extends Overlay
 {
+    private static final Logger logger = LoggerFactory.getLogger(FriendlyGuideOverlay.class);
     private static final BufferedImage[] images = new BufferedImage[4];
 
     static
@@ -22,7 +25,7 @@ public class FriendlyGuideOverlay extends Overlay
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error(String.valueOf(ex));
         }
     }
 
