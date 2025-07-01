@@ -16,10 +16,6 @@ public class DialogMusicRequirement extends DialogRequirement
     String track;
     private Boolean isMet = null;
 
-    static
-    {
-        DialogRequirement.RegisterCreateCall("music", DialogMusicRequirement::create);
-    }
     public static DialogMusicRequirement create(TomlTable requirement) {
         DialogMusicRequirement req = new DialogMusicRequirement();
         req.track = "MUSIC_" + (requirement.getString("track").replaceAll(" ", "_").toUpperCase());

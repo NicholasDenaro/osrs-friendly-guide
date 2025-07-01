@@ -4,6 +4,8 @@ import ch.qos.logback.classic.Level;
 import dev.denaro.dialog.Dialog;
 import dev.denaro.dialog.DialogMessage;
 import dev.denaro.dialog.DialogOption;
+import dev.denaro.dialog.options.conditions.DialogCondition;
+import dev.denaro.dialog.options.requirements.DialogRequirement;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
@@ -29,6 +31,8 @@ public class DialogTest
 
     public static void main(String[] args) throws InterruptedException
     {
+        DialogCondition.registerAllConditions();
+        DialogRequirement.registerAllRequirements();
         ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         logger.setLevel(Level.ALL);
 

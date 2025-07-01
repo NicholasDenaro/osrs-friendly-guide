@@ -16,10 +16,6 @@ public class DialogSkillRequirement extends DialogRequirement
     int levelMin;
     int levelMax;
 
-    static
-    {
-        DialogRequirement.RegisterCreateCall("skill", DialogSkillRequirement::create);
-    }
     public static DialogSkillRequirement create(TomlTable requirement)
     {
         DialogSkillRequirement req = new DialogSkillRequirement();

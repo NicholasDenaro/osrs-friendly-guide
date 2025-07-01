@@ -8,10 +8,6 @@ import org.tomlj.TomlTable;
 @Component
 public class DialogMembersRequirement extends DialogRequirement
 {
-    static
-    {
-        DialogRequirement.RegisterCreateCall("members", DialogMembersRequirement::create);
-    }
     public static DialogMembersRequirement create(TomlTable requirement)
     {
         return new DialogMembersRequirement();

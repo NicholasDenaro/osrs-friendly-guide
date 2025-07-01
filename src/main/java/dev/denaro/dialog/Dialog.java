@@ -157,6 +157,7 @@ public abstract class Dialog
         }
         catch (Exception e)
         {
+            logger.error("Error", e);
             return new DialogOption(new DialogOption.Option[]{new DialogOption.Option("Error", new DialogMessage(DialogMessage.DialogSpeaker.Guide, "Error"))});
         }
     }
@@ -226,7 +227,6 @@ public abstract class Dialog
         {
             logger.error("Other Exception:", exception);
         }
-
     }
 
     private static void loadDocument(TomlParseResult document)

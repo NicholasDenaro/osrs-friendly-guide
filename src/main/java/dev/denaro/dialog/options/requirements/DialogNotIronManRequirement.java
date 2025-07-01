@@ -8,10 +8,6 @@ import org.tomlj.TomlTable;
 @Component
 public class DialogNotIronManRequirement extends DialogRequirement
 {
-    static
-    {
-        DialogRequirement.RegisterCreateCall("notironman", DialogNotIronManRequirement::create);
-    }
     public static DialogNotIronManRequirement create(TomlTable requirement)
     {
         return new DialogNotIronManRequirement();

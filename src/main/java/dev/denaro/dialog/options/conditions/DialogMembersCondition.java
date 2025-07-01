@@ -8,11 +8,6 @@ import net.runelite.api.annotations.Component;
 @Component
 public class DialogMembersCondition extends DialogCondition
 {
-    static
-    {
-        DialogCondition.register("members", new DialogMembersCondition());
-    }
-
     @Override
     public boolean _is(Client client)
     {

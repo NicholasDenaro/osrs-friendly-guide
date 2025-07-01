@@ -5,6 +5,8 @@ import javax.inject.Inject;
 
 import com.google.inject.name.Named;
 import dev.denaro.dialog.Dialog;
+import dev.denaro.dialog.options.conditions.DialogCondition;
+import dev.denaro.dialog.options.requirements.DialogRequirement;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -76,6 +78,8 @@ public class FriendlyGuidePlugin extends Plugin
 	@Override
 	protected void startUp() throws InterruptedException {
 		log.info("Friendly Guide started!");
+		DialogCondition.registerAllConditions();
+		DialogRequirement.registerAllRequirements();
 
 		this.overlayManager.add(overlay = new FriendlyGuideOverlay());
 

@@ -3,12 +3,16 @@ package dev.denaro;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import dev.denaro.dialog.Dialog;
+import dev.denaro.dialog.options.conditions.DialogCondition;
+import dev.denaro.dialog.options.requirements.DialogRequirement;
 import org.slf4j.LoggerFactory;
 
 public class TomlTest
 {
     public static void main(String[] args)
     {
+        DialogCondition.registerAllConditions();
+        DialogRequirement.registerAllRequirements();
         ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         logger.setLevel(Level.ALL);
         String tomlStr = "type = \"Item\"\n" +

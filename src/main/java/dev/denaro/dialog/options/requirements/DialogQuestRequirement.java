@@ -11,10 +11,6 @@ public class DialogQuestRequirement extends DialogRequirement
     String status;
     String atleast;
 
-    static
-    {
-        DialogRequirement.RegisterCreateCall("quest", DialogQuestRequirement::create);
-    }
     public static DialogQuestRequirement create(TomlTable requirement)
     {
         DialogQuestRequirement req = new DialogQuestRequirement();
