@@ -17,7 +17,7 @@ The friendly guide pulls dialogs from the https://github.com/NicholasDenaro/osrs
 updated without the need for updating the plugin. This also provides a collaborative environment for adding new dialogs
 or removing them for better options. The content is cached within the user's config so they don't need to download every time.
 
-Dialog are yaml so they are easy to read and construct. The general format looks like this:
+Dialog are toml so they are relatively easy to read and construct. The general format looks like this:
 ```
 type = "Combat|Quest|Money|Skill|Item|Explore"
 
