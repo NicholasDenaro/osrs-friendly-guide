@@ -22,11 +22,11 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
+import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.net.http.HttpClient;
 import java.util.Arrays;
 
 @Slf4j
@@ -73,7 +73,7 @@ public class FriendlyGuidePlugin extends Plugin
 	@Inject
 	@Named("developerMode") boolean developerMode;
 
-	private final HttpClient httpClient = HttpClient.newHttpClient();
+	private final OkHttpClient httpClient = new OkHttpClient();
 
 	@Override
 	protected void startUp() throws InterruptedException {

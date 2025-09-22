@@ -11,11 +11,11 @@ import net.runelite.api.Player;
 import net.runelite.api.Skill;
 import net.runelite.api.WorldType;
 import net.runelite.client.config.ConfigManager;
+import okhttp3.OkHttpClient;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -39,6 +39,7 @@ public class DialogTest
         FriendlyGuideConfig config = mock(FriendlyGuideConfig.class);
 
         Mockito.when(config.etag()).thenReturn("a");
+//        Mockito.when(config.etag()).thenReturn("\"0x8DDAFAB95F9C54E\"");
         Mockito.when(config.showIntroduction()).thenReturn(false);
 
         ConfigManager configManager = mock(ConfigManager.class);
@@ -56,7 +57,7 @@ public class DialogTest
         }).when(configManager).setConfiguration(Mockito.eq("friendlyGuide"), Mockito.eq("data"), Mockito.anyString());
 
         logger.info("Loading data");
-        new DialogDataLoader(HttpClient.newHttpClient(), config, configManager).Load();
+        new DialogDataLoader(new OkHttpClient(), config, configManager).Load();
         logger.info("Finished loading data");
 
         Client clientMock = mock(Client.class);
@@ -128,9 +129,12 @@ public class DialogTest
                 if (!subOptions.isEmpty())
                 {
                     // Replay with another sub option
+                    logger.info("i--, replay a sub option");
                     i--;
                 }
             }
         }
+
+        logger.info("Test done");
     }
 }
