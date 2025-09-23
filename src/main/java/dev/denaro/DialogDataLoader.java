@@ -2,11 +2,11 @@ package dev.denaro;
 
 import dev.denaro.dialog.Dialog;
 import net.runelite.client.config.ConfigManager;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class DialogDataLoader
 {
@@ -22,15 +22,24 @@ public class DialogDataLoader
     }
 
     public void Load() {
-        try {
-            logger.debug("Loading Dialog data...");
-            logger.debug("etag:" + this.config.etag());
-            Request request = new Request.Builder()
-                    .get()
-                    .url("https://github.com/NicholasDenaro/osrs-friendly-guide-responses/releases/download/Latest/merged.toml")
-                    .header("IF-NONE-MATCH", this.config.etag())
-                    .build();
-            try (Response response = httpClient.newCall(request).execute();) {
+        logger.debug("Loading Dialog data...");
+        logger.debug("etag:" + this.config.etag());
+        Request request = new Request.Builder()
+                .get()
+                .url("https://github.com/NicholasDenaro/osrs-friendly-guide-responses/releases/download/Latest/merged.toml")
+                .header("IF-NONE-MATCH", this.config.etag())
+                .build();
+
+        final ConfigManager cfgMgr = this.configManager;
+
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                logger.error("Failed to get guide responses");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
                 logger.debug("Data received, code: " + response.code());
                 if (response.code() == 304) {
                     logger.debug("Using cached data for etag=" + config.etag());
@@ -39,20 +48,17 @@ public class DialogDataLoader
                 {
                     String body = response.body().string();
                     if (body.startsWith("\n---")) {
-                        this.configManager.setConfiguration("friendlyGuide", "etag", response.headers().get("etag"));
+                        cfgMgr.setConfiguration("friendlyGuide", "etag", response.headers().get("etag"));
                         logger.debug("Set etag=" + config.etag());
-                        this.configManager.setConfiguration("friendlyGuide", "data", body);
+                        cfgMgr.setConfiguration("friendlyGuide", "data", body);
                     }
 
                 } else {
                     logger.error("Error fetching dynamic responses. Status=" + response.code() + "\nUsing cache of dynamic responses");
                 }
+
+                Dialog.loadDynamicToml(config.data());
             }
-
-            Dialog.loadDynamicToml(config.data());
-
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        }
+        });
     }
 }

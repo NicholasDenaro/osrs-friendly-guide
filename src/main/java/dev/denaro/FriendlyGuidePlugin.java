@@ -73,7 +73,8 @@ public class FriendlyGuidePlugin extends Plugin
 	@Inject
 	@Named("developerMode") boolean developerMode;
 
-	private final OkHttpClient httpClient = new OkHttpClient();
+	@Inject
+	private OkHttpClient httpClient;
 
 	@Override
 	protected void startUp() throws InterruptedException {
