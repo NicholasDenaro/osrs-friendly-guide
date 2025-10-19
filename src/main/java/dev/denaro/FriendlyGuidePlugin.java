@@ -114,7 +114,7 @@ public class FriendlyGuidePlugin extends Plugin
 
 		for (Guide guide : Guide.allGuides())
 		{
-			Shape shape = Perspective.getClickbox(this.client, guide.getModel(), guide.getOrientation(), guide.getX(), guide.getY(), guide.getZ());
+			Shape shape = Perspective.getClickbox(this.client, this.client.getTopLevelWorldView(), guide.getModel(), guide.getOrientation(), guide.getX(), guide.getY(), guide.getZ());
 			Point point = this.client.getMouseCanvasPosition();
 			if (shape != null && shape.contains(point.getX(), point.getY()))
 			{
